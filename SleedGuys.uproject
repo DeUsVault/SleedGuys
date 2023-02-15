@@ -1,0 +1,22 @@
+{
+	"FileVersion": 3,
+	"EngineAssociation": "{56EDC2AF-43ED-485A-7F53-9C804007A638}",
+	"Category": "",
+	"Description": "",
+	"Modules": [
+		{
+			"Name": "SleedGuys",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		}
+	],
+	"Plugins": [
+		{
+			"Name": "ModelingToolsEditorMode",
+			"Enabled": true,
+			"TargetAllowList": [
+				"Editor"
+			]
+		}
+	]
+}
