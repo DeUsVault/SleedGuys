@@ -97,5 +97,10 @@ void ASleedCharacter::Look(const FInputActionValue& Value)
 void ASleedCharacter::Jump()
 {
 	Super::Jump();
+
+	int32 Count = this->JumpCurrentCount;
+	FString CountString = FString::FromInt(Count);
+	if (GEngine)
+		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, CountString);
 }
 

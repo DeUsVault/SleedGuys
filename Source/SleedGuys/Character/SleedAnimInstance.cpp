@@ -27,6 +27,7 @@ void USleedAnimInstance::NativeUpdateAnimation(float DeltaTime)
 	Speed = Velocity.Size();
 
 	bIsInAir = SleedCharacter->GetCharacterMovement()->IsFalling();
+	JumpCount = SleedCharacter->JumpCurrentCount;
 	bIsAccelerating = SleedCharacter->GetCharacterMovement()->GetCurrentAcceleration().Size() > 0.f ? true : false;
 }
 
