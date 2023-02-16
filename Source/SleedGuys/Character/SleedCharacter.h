@@ -6,6 +6,9 @@
 #include "GameFramework/Character.h"
 #include "SleedCharacter.generated.h"
 
+class USpringArmComponent;
+class UCameraComponent;
+
 UCLASS()
 class SLEEDGUYS_API ASleedCharacter : public ACharacter
 {
@@ -18,5 +21,15 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+
+private:
+	UPROPERTY(VisibleAnywhere, Category = Camera)
+	USpringArmComponent* CameraBoom;
+
+	UPROPERTY(VisibleAnywhere, Category = Camera)
+	UCameraComponent* FollowCamera;
+
+public:
+	// Place for Getters/Setters only
 
 };
