@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "InputActionValue.h"
+#include "SleedGuys/Enums/CharacterEnums.h"
 #include "SleedCharacter.generated.h"
 
 class USpringArmComponent;
@@ -43,11 +44,19 @@ protected:
 	UInputAction* JumpAction;
 
 private:
+	// Camera
 	UPROPERTY(EditAnywhere, Category = Camera)
 	USpringArmComponent* CameraBoom;
 
 	UPROPERTY(EditAnywhere, Category = Camera)
 	UCameraComponent* FollowCamera;
+
+	// Jump Logic
+	UPROPERTY(EditAnywhere, Category = "Jump")
+	float firstJumpHeight = 420.f;
+
+	UPROPERTY(EditAnywhere, Category = "Jump")
+	float secondJumpHeight = 600.f;
 
 public:
 	// Place for Getters/Setters only

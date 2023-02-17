@@ -95,12 +95,17 @@ void ASleedCharacter::Look(const FInputActionValue& Value)
 }
 
 void ASleedCharacter::Jump()
-{
-	Super::Jump();
+{	
+	if (this->JumpCurrentCount == 0)
+	{
+		GetCharacterMovement()->JumpZVelocity = firstJumpHeight;
+	}
+	else if (this->JumpCurrentCount == 1)
+	{
+		GetCharacterMovement()->JumpZVelocity = secondJumpHeight;
+	}
 
-	int32 Count = this->JumpCurrentCount;
-	FString CountString = FString::FromInt(Count);
-	if (GEngine)
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, CountString);
+	Super::Jump();
 }
+
 

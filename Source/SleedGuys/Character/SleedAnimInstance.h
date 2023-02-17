@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Animation/AnimInstance.h"
+#include "SleedGuys/Enums/CharacterEnums.h"
 #include "SleedAnimInstance.generated.h"
 
 class ASleedCharacter;
