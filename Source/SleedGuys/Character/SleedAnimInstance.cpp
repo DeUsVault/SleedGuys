@@ -28,7 +28,7 @@ void USleedAnimInstance::NativeUpdateAnimation(float DeltaTime)
 	Speed = Velocity.Size();
 
 	bIsInAir = SleedCharacter->GetCharacterMovement()->IsFalling();
-	CanDoubleJump = SleedCharacter->getDoubleJumpTime();
+	bCanDoubleJump = SleedCharacter->getShouldDoubleJump();
 
 	bIsAccelerating = SleedCharacter->GetCharacterMovement()->GetCurrentAcceleration().Size() > 0.f ? true : false;
 }

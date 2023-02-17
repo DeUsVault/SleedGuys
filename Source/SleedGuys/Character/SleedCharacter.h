@@ -61,7 +61,7 @@ private:
 	float secondJumpHeight = 600.f;
 
 	UPROPERTY(Replicated)
-	bool doubleJumpTime;
+	bool bShouldDoubleJump;
 
 	// Weapon Logic
 	UPROPERTY(Replicated, ReplicatedUsing = OnRep_OverlappingWeapon)
@@ -73,6 +73,6 @@ private:
 public:
 	// Place for Getters/Setters only
 	void SetOverlappingWeapon(ABaseWeapon* Weapon);
-	FORCEINLINE bool getDoubleJumpTime() { return this->doubleJumpTime; }
+	FORCEINLINE bool getShouldDoubleJump() { return this->bShouldDoubleJump; }
 
 };
