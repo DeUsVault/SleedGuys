@@ -44,6 +44,7 @@ void ASleedCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutL
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME_CONDITION(ASleedCharacter, OverlappingWeapon, COND_OwnerOnly);
+	DOREPLIFETIME(ASleedCharacter, doubleJumpTime);
 }
 
 void ASleedCharacter::BeginPlay()
@@ -136,10 +137,12 @@ void ASleedCharacter::Jump()
 	if (this->JumpCurrentCount == 0)
 	{
 		GetCharacterMovement()->JumpZVelocity = firstJumpHeight;
+		doubleJumpTime = false;
 	}
 	else if (this->JumpCurrentCount == 1)
 	{
 		GetCharacterMovement()->JumpZVelocity = secondJumpHeight;
+		doubleJumpTime = true;
 	}
 
 	Super::Jump();
