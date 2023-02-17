@@ -5,6 +5,8 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Net/UnrealNetwork.h"
+#include "SleedGuys/Weapon/BaseWeapon.h"
 
 #include "Components/InputComponent.h"
 #include "EnhancedInputComponent.h"
@@ -37,6 +39,13 @@ ASleedCharacter::ASleedCharacter()
 
 }
 
+void ASleedCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME_CONDITION(ASleedCharacter, OverlappingWeapon, COND_OwnerOnly);
+}
+
 void ASleedCharacter::BeginPlay()
 {
 	Super::BeginPlay();
@@ -56,6 +65,34 @@ void ASleedCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+}
+
+void ASleedCharacter::SetOverlappingWeapon(ABaseWeapon* Weapon)
+{
+	if(OverlappingWeapon)
+	{
+		OverlappingWeapon->ShowPickupWidget(false);
+	}
+	OverlappingWeapon = Weapon;
+	if (IsLocallyControlled())
+	{
+		if (OverlappingWeapon)
+		{
+			OverlappingWeapon->ShowPickupWidget(true);
+		}
+	}
+}
+
+void ASleedCharacter::OnRep_OverlappingWeapon(ABaseWeapon* LastWeapon)
+{
+	if (OverlappingWeapon)
+	{
+		OverlappingWeapon->ShowPickupWidget(true);
+	}
+	if (LastWeapon)
+	{
+		LastWeapon->ShowPickupWidget(false);
+	}
 }
 
 void ASleedCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)

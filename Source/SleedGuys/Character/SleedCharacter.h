@@ -12,6 +12,7 @@ class USpringArmComponent;
 class UCameraComponent;
 class UInputMappingContext;
 class UInputAction;
+class ABaseWeapon;
 
 UCLASS()
 class SLEEDGUYS_API ASleedCharacter : public ACharacter
@@ -22,6 +23,7 @@ public:
 	ASleedCharacter();
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	/* Callbacks for input */
 	void Move(const FInputActionValue& Value);
@@ -58,7 +60,15 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Jump")
 	float secondJumpHeight = 600.f;
 
+	// Weapon Logic
+	UPROPERTY(Replicated, ReplicatedUsing = OnRep_OverlappingWeapon)
+	ABaseWeapon* OverlappingWeapon;
+
+	UFUNCTION()
+	void OnRep_OverlappingWeapon(ABaseWeapon* LastWeapon);
+
 public:
 	// Place for Getters/Setters only
+	void SetOverlappingWeapon(ABaseWeapon* Weapon);
 
 };
