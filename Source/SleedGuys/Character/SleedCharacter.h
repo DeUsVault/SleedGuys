@@ -94,6 +94,18 @@ private:
 	UPROPERTY(VisibleAnywhere)
 	UCombatComp* Combat;
 
+	// Character Attributes
+	//
+	//
+	UPROPERTY(EditAnywhere, Category = "Player Stats")
+	float MaxHealth = 100.f;
+
+	UPROPERTY(ReplicatedUsing = OnRep_Health, VisibleAnywhere, Category = "Player Stats")
+	float Health = 100.f;
+
+	UFUNCTION()
+	void OnRep_Health();
+
 public:
 	// Place for Getters/Setters only
 	//

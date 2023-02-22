@@ -80,6 +80,7 @@ void ASleedCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutL
 
 	DOREPLIFETIME_CONDITION(ASleedCharacter, OverlappingWeapon, COND_OwnerOnly);
 	DOREPLIFETIME(ASleedCharacter, bShouldDoubleJump);
+	DOREPLIFETIME(ASleedCharacter, Health);
 }
 
 void ASleedCharacter::PostInitializeComponents()
@@ -89,6 +90,11 @@ void ASleedCharacter::PostInitializeComponents()
 	{
 		Combat->Character = this;
 	}
+}
+
+void ASleedCharacter::OnRep_Health()
+{
+
 }
 
 void ASleedCharacter::SetOverlappingWeapon(ABaseWeapon* Weapon)
