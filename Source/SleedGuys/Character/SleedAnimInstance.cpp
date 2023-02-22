@@ -31,5 +31,7 @@ void USleedAnimInstance::NativeUpdateAnimation(float DeltaTime)
 	bCanDoubleJump = SleedCharacter->getShouldDoubleJump();
 
 	bIsAccelerating = SleedCharacter->GetCharacterMovement()->GetCurrentAcceleration().Size() > 0.f ? true : false;
+
+	bWeaponEquipped = SleedCharacter->IsWeaponEquipped();
 }
 

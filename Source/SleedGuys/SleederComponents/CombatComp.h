@@ -16,8 +16,9 @@ class SLEEDGUYS_API UCombatComp : public UActorComponent
 
 public:	
 	UCombatComp();
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	friend class ASleedCharacter;
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	void EquipWeapon(ABaseWeapon* WeaponToEquip);
 
@@ -26,6 +27,8 @@ protected:
 
 private:
 	ASleedCharacter* Character;
+
+	UPROPERTY(Replicated)
 	ABaseWeapon* EquippedWeapon;
 
 public:	

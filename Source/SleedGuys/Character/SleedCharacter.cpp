@@ -119,6 +119,11 @@ void ASleedCharacter::OnRep_OverlappingWeapon(ABaseWeapon* LastWeapon)
 	}
 }
 
+bool ASleedCharacter::IsWeaponEquipped()
+{
+	return (Combat && Combat->EquippedWeapon);
+}
+
 void ASleedCharacter::Move(const FInputActionValue& Value)
 {
 	const FVector2D MovementVector = Value.Get<FVector2D>();

@@ -6,10 +6,16 @@
 #include "SleedGuys/Weapon/BaseWeapon.h"
 #include "SleedGuys/Enums/CharacterEnums.h"
 #include "Engine/SkeletalMeshSocket.h"
+#include "Net/UnrealNetwork.h"
 
 UCombatComp::UCombatComp()
 {
 	PrimaryComponentTick.bCanEverTick = true;
+}
+
+void UCombatComp::BeginPlay()
+{
+	Super::BeginPlay();
 }
 
 void UCombatComp::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -17,9 +23,11 @@ void UCombatComp::TickComponent(float DeltaTime, ELevelTick TickType, FActorComp
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 }
 
-void UCombatComp::BeginPlay()
+void UCombatComp::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
-	Super::BeginPlay();
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(UCombatComp, EquippedWeapon);
 }
 
 void UCombatComp::EquipWeapon(ABaseWeapon* WeaponToEquip)

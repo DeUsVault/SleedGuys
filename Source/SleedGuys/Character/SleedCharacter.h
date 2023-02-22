@@ -100,5 +100,6 @@ public:
 	//
 	void SetOverlappingWeapon(ABaseWeapon* Weapon);
 	FORCEINLINE bool getShouldDoubleJump() { return this->bShouldDoubleJump; }
+	bool IsWeaponEquipped();
 
 };
