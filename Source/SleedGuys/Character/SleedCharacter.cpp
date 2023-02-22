@@ -7,6 +7,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Net/UnrealNetwork.h"
 #include "SleedGuys/Weapon/BaseWeapon.h"
+#include "SleedGuys/SleederComponents/CombatComp.h"
 
 #include "Components/InputComponent.h"
 #include "EnhancedInputComponent.h"
@@ -37,14 +38,8 @@ ASleedCharacter::ASleedCharacter()
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("ViewCamera"));
 	FollowCamera->SetupAttachment(CameraBoom);
 
-}
-
-void ASleedCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
-{
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-
-	DOREPLIFETIME_CONDITION(ASleedCharacter, OverlappingWeapon, COND_OwnerOnly);
-	DOREPLIFETIME(ASleedCharacter, bShouldDoubleJump);
+	Combat = CreateDefaultSubobject<UCombatComp>(TEXT("CombatComponent"));
+	Combat->SetIsReplicated(true);
 }
 
 void ASleedCharacter::BeginPlay()
@@ -59,18 +54,46 @@ void ASleedCharacter::BeginPlay()
 			Subsystem->AddMappingContext(SleedContext, 0);
 		}
 	}
-	
 }
 
 void ASleedCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+}
 
+void ASleedCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+{
+	Super::SetupPlayerInputComponent(PlayerInputComponent);
+
+	if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent))
+	{
+		EnhancedInputComponent->BindAction(MovementAction, ETriggerEvent::Triggered, this, &ASleedCharacter::Move);
+		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ASleedCharacter::Look);
+		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ASleedCharacter::Jump);
+		EnhancedInputComponent->BindAction(EquipAction, ETriggerEvent::Triggered, this, &ASleedCharacter::EquipButtonPressed);
+	}
+}
+
+void ASleedCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME_CONDITION(ASleedCharacter, OverlappingWeapon, COND_OwnerOnly);
+	DOREPLIFETIME(ASleedCharacter, bShouldDoubleJump);
+}
+
+void ASleedCharacter::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+	if (Combat)
+	{
+		Combat->Character = this;
+	}
 }
 
 void ASleedCharacter::SetOverlappingWeapon(ABaseWeapon* Weapon)
 {
-	if(OverlappingWeapon)
+	if (OverlappingWeapon)
 	{
 		OverlappingWeapon->ShowPickupWidget(false);
 	}
@@ -94,19 +117,6 @@ void ASleedCharacter::OnRep_OverlappingWeapon(ABaseWeapon* LastWeapon)
 	{
 		LastWeapon->ShowPickupWidget(false);
 	}
-}
-
-void ASleedCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
-{
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
-	if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent))
-	{
-		EnhancedInputComponent->BindAction(MovementAction, ETriggerEvent::Triggered, this, &ASleedCharacter::Move);
-		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ASleedCharacter::Look);
-		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ASleedCharacter::Jump);
-	}
-
 }
 
 void ASleedCharacter::Move(const FInputActionValue& Value)
@@ -146,6 +156,14 @@ void ASleedCharacter::Jump()
 	}
 
 	Super::Jump();
+}
+
+void ASleedCharacter::EquipButtonPressed()
+{
+	if (Combat && HasAuthority())
+	{
+		Combat->EquipWeapon(OverlappingWeapon);
+	}
 }
 
 

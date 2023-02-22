@@ -13,6 +13,7 @@ class UCameraComponent;
 class UInputMappingContext;
 class UInputAction;
 class ABaseWeapon;
+class UCombatComp;
 
 UCLASS()
 class SLEEDGUYS_API ASleedCharacter : public ACharacter
@@ -25,10 +26,15 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
-	/* Callbacks for input */
+	virtual void PostInitializeComponents() override;
+
+	/* 
+	*	Callbacks for input 
+	*/
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
 	virtual void Jump() override;
+	void EquipButtonPressed();
 
 protected:
 	virtual void BeginPlay() override;
@@ -45,8 +51,13 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Input")
 	UInputAction* JumpAction;
 
+	UPROPERTY(EditAnywhere, Category = "Input")
+	UInputAction* EquipAction;
+
 private:
 	// Camera
+	//
+	//
 	UPROPERTY(EditAnywhere, Category = Camera)
 	USpringArmComponent* CameraBoom;
 
@@ -54,6 +65,8 @@ private:
 	UCameraComponent* FollowCamera;
 
 	// Jump Logic
+	//
+	//
 	UPROPERTY(EditAnywhere, Category = "Jump")
 	float firstJumpHeight = 420.f;
 
@@ -64,14 +77,24 @@ private:
 	bool bShouldDoubleJump;
 
 	// Weapon Logic
+	//
+	//
 	UPROPERTY(Replicated, ReplicatedUsing = OnRep_OverlappingWeapon)
 	ABaseWeapon* OverlappingWeapon;
 
 	UFUNCTION()
 	void OnRep_OverlappingWeapon(ABaseWeapon* LastWeapon);
 
+	// Combat Logic
+	//
+	//
+	UPROPERTY(VisibleAnywhere)
+	UCombatComp* Combat;
+
 public:
 	// Place for Getters/Setters only
+	//
+	//
 	void SetOverlappingWeapon(ABaseWeapon* Weapon);
 	FORCEINLINE bool getShouldDoubleJump() { return this->bShouldDoubleJump; }
 
