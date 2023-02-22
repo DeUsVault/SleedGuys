@@ -33,6 +33,5 @@ void UCombatComp::EquipWeapon(ABaseWeapon* WeaponToEquip)
 	{
 		HandSocket->AttachActor(EquippedWeapon, Character->GetMesh());
 	}
-	EquippedWeapon->SetOwner(Character);
-	EquippedWeapon->ShowPickupWidget(false);
+	EquippedWeapon->SetOwner(Character); // owner is replicated on its own
 }

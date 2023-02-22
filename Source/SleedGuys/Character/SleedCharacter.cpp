@@ -160,7 +160,23 @@ void ASleedCharacter::Jump()
 
 void ASleedCharacter::EquipButtonPressed()
 {
-	if (Combat && HasAuthority())
+	if (Combat)
+	{
+		if (HasAuthority())
+		{
+			Combat->EquipWeapon(OverlappingWeapon);
+		}
+		else
+		{	
+			// calling this on the client, executing it on the server
+			ServerEquipButtonPressed();
+		}
+	}
+}
+
+void ASleedCharacter::ServerEquipButtonPressed_Implementation()
+{
+	if (Combat)
 	{
 		Combat->EquipWeapon(OverlappingWeapon);
 	}

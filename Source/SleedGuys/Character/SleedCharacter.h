@@ -85,6 +85,9 @@ private:
 	UFUNCTION()
 	void OnRep_OverlappingWeapon(ABaseWeapon* LastWeapon);
 
+	UFUNCTION(Server, Reliable)
+	void ServerEquipButtonPressed();
+
 	// Combat Logic
 	//
 	//
