@@ -86,7 +86,7 @@ void ASleedCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutL
 	DOREPLIFETIME_CONDITION(ASleedCharacter, OverlappingWeapon, COND_OwnerOnly);
 	DOREPLIFETIME(ASleedCharacter, bShouldDoubleJump);
 	DOREPLIFETIME(ASleedCharacter, Health);
-	DOREPLIFETIME_CONDITION(ASleedCharacter, Stamina, COND_OwnerOnly);
+	DOREPLIFETIME(ASleedCharacter, Stamina);
 }
 
 void ASleedCharacter::PostInitializeComponents()
@@ -104,8 +104,18 @@ void ASleedCharacter::OnRep_Health()
 }
 
 void ASleedCharacter::OnRep_Stamina()
-{
+{	
+	// it isnt used atm - not being replicated here
+	UpdateHUDStamina();
+}
 
+void ASleedCharacter::UpdateHUDStamina()
+{
+	SleedPlayerController = SleedPlayerController == nullptr ? Cast<ASleedPlayerController>(Controller) : SleedPlayerController;
+	if (SleedPlayerController)
+	{
+		SleedPlayerController->SetHUDStamina(Stamina, MaxStamina);
+	}
 }
 
 void ASleedCharacter::SetOverlappingWeapon(ABaseWeapon* Weapon)
@@ -172,9 +182,14 @@ void ASleedCharacter::Jump()
 		bShouldDoubleJump = false;
 	}
 	else if (this->JumpCurrentCount == 1)
-	{
+	{	
+		if (Stamina <= 0) return;
+
 		GetCharacterMovement()->JumpZVelocity = secondJumpHeight;
 		bShouldDoubleJump = true;
+
+		Stamina = FMath::Clamp(Stamina - JumpCost, 0.f, MaxStamina);
+		UpdateHUDStamina();
 	}
 
 	Super::Jump();

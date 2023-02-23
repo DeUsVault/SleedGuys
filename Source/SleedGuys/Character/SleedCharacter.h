@@ -80,6 +80,9 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Jump")
 	float secondJumpHeight = 600.f;
 
+	UPROPERTY(EditAnywhere, Category = "Jump")
+	float JumpCost = 20.f;
+
 	UPROPERTY(Replicated)
 	bool bShouldDoubleJump;
 
@@ -121,6 +124,8 @@ private:
 
 	UFUNCTION()
 	void OnRep_Stamina();
+
+	void UpdateHUDStamina();
 
 public:
 	// Place for Getters/Setters only
