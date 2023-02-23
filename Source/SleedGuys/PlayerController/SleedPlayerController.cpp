@@ -2,4 +2,33 @@
 
 
 #include "SleedPlayerController.h"
+#include "SleedGuys/HUD/SleedHUD.h"
+#include "SleedGuys/HUD/CharacterOverlay.h"
+#include "Components/ProgressBar.h"
+#include "Components/TextBlock.h"
+
+void ASleedPlayerController::BeginPlay()
+{
+	Super::BeginPlay();
+
+	SleedHUD = Cast<ASleedHUD>(GetHUD());
+}
+
+void ASleedPlayerController::SetHUDHealth(float Health, float MaxHealth)
+{
+	SleedHUD = SleedHUD == nullptr ? Cast<ASleedHUD>(GetHUD()) : SleedHUD;
+
+	bool bHUDValid = SleedHUD &&
+		SleedHUD->CharacterOverlay &&
+		SleedHUD->CharacterOverlay->HealthBar &&
+		SleedHUD->CharacterOverlay->HealthText;
+	if (bHUDValid)
+	{
+		const float HealthPercent = Health / MaxHealth;
+		SleedHUD->CharacterOverlay->HealthBar->SetPercent(HealthPercent);
+		
+		FString HealthText = FString::Printf(TEXT("%.2f%%"), (HealthPercent * 100));
+		SleedHUD->CharacterOverlay->HealthText->SetText(FText::FromString(HealthText));
+	}
+}
 

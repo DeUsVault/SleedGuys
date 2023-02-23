@@ -14,6 +14,7 @@ class UInputMappingContext;
 class UInputAction;
 class ABaseWeapon;
 class UCombatComp;
+class ASleedPlayerController;
 
 UCLASS()
 class SLEEDGUYS_API ASleedCharacter : public ACharacter
@@ -55,6 +56,12 @@ protected:
 	UInputAction* EquipAction;
 
 private:
+	// Controller
+	//
+	//
+
+	ASleedPlayerController* SleedPlayerController;
+
 	// Camera
 	//
 	//
@@ -100,7 +107,7 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Player Stats")
 	float MaxHealth = 100.f;
 
-	UPROPERTY(ReplicatedUsing = OnRep_Health, VisibleAnywhere, Category = "Player Stats")
+	UPROPERTY(ReplicatedUsing = OnRep_Health, EditAnywhere, Category = "Player Stats")
 	float Health = 100.f;
 
 	UFUNCTION()

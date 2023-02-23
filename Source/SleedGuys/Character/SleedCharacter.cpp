@@ -8,6 +8,7 @@
 #include "Net/UnrealNetwork.h"
 #include "SleedGuys/Weapon/BaseWeapon.h"
 #include "SleedGuys/SleederComponents/CombatComp.h"
+#include "SleedGuys/PlayerController/SleedPlayerController.h"
 
 #include "Components/InputComponent.h"
 #include "EnhancedInputComponent.h"
@@ -46,13 +47,16 @@ void ASleedCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
-	{
-		UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer());
+	SleedPlayerController = Cast<ASleedPlayerController>(Controller);
+	if (SleedPlayerController)
+	{	
+		UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(SleedPlayerController->GetLocalPlayer());
 		if (Subsystem)
 		{
 			Subsystem->AddMappingContext(SleedContext, 0);
 		}
+
+		SleedPlayerController->SetHUDHealth(Health, MaxHealth);
 	}
 }
 
