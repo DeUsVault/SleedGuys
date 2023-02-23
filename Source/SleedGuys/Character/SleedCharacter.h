@@ -36,6 +36,7 @@ public:
 	void Look(const FInputActionValue& Value);
 	virtual void Jump() override;
 	void EquipButtonPressed();
+	void Sprint();
 
 protected:
 	virtual void BeginPlay() override;
@@ -54,6 +55,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = "Input")
 	UInputAction* EquipAction;
+
+	UPROPERTY(EditAnywhere, Category = "Input")
+	UInputAction* SprintAction;
 
 private:
 	// Controller
@@ -126,6 +130,28 @@ private:
 	void OnRep_Stamina();
 
 	void UpdateHUDStamina();
+
+	// Sprint 
+	//
+	//
+	UPROPERTY(EditAnywhere, Category = "Player Stats")
+	float OriginalSpeed = 600.f;
+
+	UPROPERTY(EditAnywhere, Category = "Player Stats")
+	float SprintSpeed = 1000.f;
+
+	UPROPERTY(EditAnywhere, Category = "Jump")
+	float SprintCost = 25.f;
+
+	UPROPERTY(EditAnywhere, Category = "Jump")
+	float MaxSprintTime = 5.f;
+
+	FTimerHandle SprintTimer;
+
+	void SprintTimerFinished();
+
+	UFUNCTION(Server, Reliable)
+	void ServerSprint(float Speed);
 
 public:
 	// Place for Getters/Setters only

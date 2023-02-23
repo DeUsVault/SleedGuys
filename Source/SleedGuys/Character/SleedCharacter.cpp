@@ -64,6 +64,11 @@ void ASleedCharacter::BeginPlay()
 void ASleedCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	/* way to check timerhandle
+		if (GEngine)
+			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("World delta for current frame equals %f"), GetWorldTimerManager().GetTimerElapsed(SprintTimer)));
+	*/
 }
 
 void ASleedCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -76,6 +81,7 @@ void ASleedCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ASleedCharacter::Look);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ASleedCharacter::Jump);
 		EnhancedInputComponent->BindAction(EquipAction, ETriggerEvent::Triggered, this, &ASleedCharacter::EquipButtonPressed);
+		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Triggered, this, &ASleedCharacter::Sprint);
 	}
 }
 
@@ -217,6 +223,31 @@ void ASleedCharacter::ServerEquipButtonPressed_Implementation()
 	{
 		Combat->EquipWeapon(OverlappingWeapon);
 	}
+}
+
+void ASleedCharacter::Sprint()
+{
+	if (Stamina <= 0) return;
+
+	GetWorldTimerManager().ClearTimer(SprintTimer);
+
+	GetCharacterMovement()->MaxWalkSpeed = SprintSpeed; // first we set it locally
+	ServerSprint(SprintSpeed); // we call the server to set it for everyone, we need to set it on both, else the version on client and version on server will have different values
+	Stamina = FMath::Clamp(Stamina - SprintCost, 0.f, MaxStamina);
+	UpdateHUDStamina();
+
+	GetWorldTimerManager().SetTimer(SprintTimer, this, &ASleedCharacter::SprintTimerFinished, MaxSprintTime);
+}
+
+void ASleedCharacter::SprintTimerFinished()
+{
+	GetCharacterMovement()->MaxWalkSpeed = OriginalSpeed; // first we set it locally
+	ServerSprint(OriginalSpeed); // we call the server to set it for everyone, we need to set it on both, else the version on client and version on server will have different values
+}
+
+void ASleedCharacter::ServerSprint_Implementation(float Speed)
+{
+	GetCharacterMovement()->MaxWalkSpeed = Speed;
 }
 
 
