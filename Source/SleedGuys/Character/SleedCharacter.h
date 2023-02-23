@@ -140,10 +140,10 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Player Stats")
 	float SprintSpeed = 1000.f;
 
-	UPROPERTY(EditAnywhere, Category = "Jump")
+	UPROPERTY(EditAnywhere, Category = "Player Stats")
 	float SprintCost = 25.f;
 
-	UPROPERTY(EditAnywhere, Category = "Jump")
+	UPROPERTY(EditAnywhere, Category = "Player Stats")
 	float MaxSprintTime = 5.f;
 
 	FTimerHandle SprintTimer;
