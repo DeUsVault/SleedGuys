@@ -32,3 +32,18 @@ void ASleedPlayerController::SetHUDHealth(float Health, float MaxHealth)
 	}
 }
 
+void ASleedPlayerController::SetHUDStamina(float Stamina, float MaxStamina)
+{
+	SleedHUD = SleedHUD == nullptr ? Cast<ASleedHUD>(GetHUD()) : SleedHUD;
+
+	bool bHUDValid = SleedHUD &&
+		SleedHUD->CharacterOverlay &&
+		SleedHUD->CharacterOverlay->StaminaBar &&
+		SleedHUD->CharacterOverlay->StaminaText;
+	if (bHUDValid)
+	{
+		const float StaminaPercent = Stamina / MaxStamina;
+		SleedHUD->CharacterOverlay->StaminaBar->SetPercent(StaminaPercent);
+	}
+}
+

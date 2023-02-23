@@ -57,6 +57,7 @@ void ASleedCharacter::BeginPlay()
 		}
 
 		SleedPlayerController->SetHUDHealth(Health, MaxHealth);
+		SleedPlayerController->SetHUDStamina(Stamina, MaxStamina);
 	}
 }
 
@@ -85,6 +86,7 @@ void ASleedCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutL
 	DOREPLIFETIME_CONDITION(ASleedCharacter, OverlappingWeapon, COND_OwnerOnly);
 	DOREPLIFETIME(ASleedCharacter, bShouldDoubleJump);
 	DOREPLIFETIME(ASleedCharacter, Health);
+	DOREPLIFETIME_CONDITION(ASleedCharacter, Stamina, COND_OwnerOnly);
 }
 
 void ASleedCharacter::PostInitializeComponents()
@@ -97,6 +99,11 @@ void ASleedCharacter::PostInitializeComponents()
 }
 
 void ASleedCharacter::OnRep_Health()
+{
+
+}
+
+void ASleedCharacter::OnRep_Stamina()
 {
 
 }

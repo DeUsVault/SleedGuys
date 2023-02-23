@@ -23,5 +23,11 @@ public:
 
 	UPROPERTY(meta = (BindWidget))
 	UTextBlock* HealthText;
+
+	UPROPERTY(meta = (BindWidget))
+	UProgressBar* StaminaBar;
+
+	UPROPERTY(meta = (BindWidget))
+	UTextBlock* StaminaText;
 	
 };

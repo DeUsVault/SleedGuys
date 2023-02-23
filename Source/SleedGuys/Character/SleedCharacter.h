@@ -113,6 +113,15 @@ private:
 	UFUNCTION()
 	void OnRep_Health();
 
+	UPROPERTY(EditAnywhere, Category = "Player Stats")
+	float MaxStamina = 100.f;
+
+	UPROPERTY(ReplicatedUsing = OnRep_Stamina, EditAnywhere, Category = "Player Stats")
+	float Stamina = 100.f;
+
+	UFUNCTION()
+	void OnRep_Stamina();
+
 public:
 	// Place for Getters/Setters only
 	//
