@@ -111,7 +111,6 @@ void ASleedCharacter::OnRep_Health()
 
 void ASleedCharacter::OnRep_Stamina()
 {	
-	// it isnt used atm - not being replicated here
 	UpdateHUDStamina();
 }
 
@@ -181,14 +180,14 @@ void ASleedCharacter::Look(const FInputActionValue& Value)
 }
 
 void ASleedCharacter::Jump()
-{	
+{	// jump is called both on server and client - reasoning not found yet!
 	if (this->JumpCurrentCount == 0)
 	{
 		GetCharacterMovement()->JumpZVelocity = firstJumpHeight;
 		bShouldDoubleJump = false;
 	}
 	else if (this->JumpCurrentCount == 1)
-	{	
+	{
 		if (Stamina <= 0) return;
 
 		GetCharacterMovement()->JumpZVelocity = secondJumpHeight;
@@ -231,10 +230,16 @@ void ASleedCharacter::Sprint()
 
 	GetWorldTimerManager().ClearTimer(SprintTimer);
 
-	GetCharacterMovement()->MaxWalkSpeed = SprintSpeed; // first we set it locally
-	ServerSprint(SprintSpeed); // we call the server to set it for everyone, we need to set it on both, else the version on client and version on server will have different values
-	Stamina = FMath::Clamp(Stamina - SprintCost, 0.f, MaxStamina);
-	UpdateHUDStamina();
+	if (HasAuthority())
+	{
+		GetCharacterMovement()->MaxWalkSpeed = SprintSpeed;
+		Stamina = FMath::Clamp(Stamina - SprintCost, 0.f, MaxStamina);
+		UpdateHUDStamina();
+	}
+	else
+	{
+		ServerSprint(SprintSpeed, true); // we call the server to set it for everyone, we need to set it on both, else the version on client and version on server will have different values
+	}
 
 	GetWorldTimerManager().SetTimer(SprintTimer, this, &ASleedCharacter::SprintTimerFinished, MaxSprintTime);
 }
@@ -242,12 +247,14 @@ void ASleedCharacter::Sprint()
 void ASleedCharacter::SprintTimerFinished()
 {
 	GetCharacterMovement()->MaxWalkSpeed = OriginalSpeed; // first we set it locally
-	ServerSprint(OriginalSpeed); // we call the server to set it for everyone, we need to set it on both, else the version on client and version on server will have different values
+	ServerSprint(OriginalSpeed, false); // we call the server to set it for everyone, we need to set it on both, else the version on client and version on server will have different values
 }
 
-void ASleedCharacter::ServerSprint_Implementation(float Speed)
+void ASleedCharacter::ServerSprint_Implementation(float Speed, bool breduceStamina)
 {
 	GetCharacterMovement()->MaxWalkSpeed = Speed;
+	if (breduceStamina)
+	{
+		Stamina = FMath::Clamp(Stamina - SprintCost, 0.f, MaxStamina);
+	}
 }
-
-

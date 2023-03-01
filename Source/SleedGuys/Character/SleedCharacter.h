@@ -151,7 +151,7 @@ private:
 	void SprintTimerFinished();
 
 	UFUNCTION(Server, Reliable)
-	void ServerSprint(float Speed);
+	void ServerSprint(float Speed, bool breduceStamina);
 
 public:
 	// Place for Getters/Setters only
