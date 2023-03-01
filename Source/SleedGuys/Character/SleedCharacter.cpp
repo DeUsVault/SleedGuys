@@ -237,7 +237,8 @@ void ASleedCharacter::Sprint()
 		UpdateHUDStamina();
 	}
 	else
-	{
+	{	
+		GetCharacterMovement()->MaxWalkSpeed = SprintSpeed; // we set it locally
 		ServerSprint(SprintSpeed, true); // we call the server to set it for everyone, we need to set it on both, else the version on client and version on server will have different values
 	}
 
@@ -245,13 +246,14 @@ void ASleedCharacter::Sprint()
 }
 
 void ASleedCharacter::SprintTimerFinished()
-{
-	GetCharacterMovement()->MaxWalkSpeed = OriginalSpeed; // first we set it locally
+{	
+	GetCharacterMovement()->MaxWalkSpeed = OriginalSpeed; // we set it locally
 	ServerSprint(OriginalSpeed, false); // we call the server to set it for everyone, we need to set it on both, else the version on client and version on server will have different values
+
 }
 
 void ASleedCharacter::ServerSprint_Implementation(float Speed, bool breduceStamina)
-{
+{	
 	GetCharacterMovement()->MaxWalkSpeed = Speed;
 	if (breduceStamina)
 	{
