@@ -18,6 +18,7 @@ public:
 	UBuffComponent();
 	friend class ASleedCharacter;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	void AddStamina(float StaminaRegenAmount, float StaminaRegenTime, bool bRegenOverTime);
 
 protected:
 	virtual void BeginPlay() override;
@@ -25,6 +26,10 @@ protected:
 private:
 	UPROPERTY()
 	ASleedCharacter* Character;
+
+	bool bIsStaminaRegenerating = false;
+	float StaminaRegeneratingRate = 0;
+	float StaminaAmountToRegen = 0.f;
 
 public:	
 

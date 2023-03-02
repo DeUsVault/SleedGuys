@@ -39,6 +39,11 @@ public:
 	void EquipButtonPressed();
 	void Sprint();
 
+	// Stamina Functions
+	//
+	//
+	void UpdateHUDStamina();
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -136,8 +141,6 @@ private:
 	UFUNCTION()
 	void OnRep_Stamina();
 
-	void UpdateHUDStamina();
-
 	// Sprint 
 	//
 	//
@@ -167,5 +170,9 @@ public:
 	void SetOverlappingWeapon(ABaseWeapon* Weapon);
 	FORCEINLINE bool getShouldDoubleJump() { return this->bShouldDoubleJump; }
 	bool IsWeaponEquipped();
+	FORCEINLINE UBuffComponent* GetBuff() const { return this->Buff; }
+	FORCEINLINE float GetStamina() const { return Stamina; }
+	FORCEINLINE float GetMaxStamina() const { return MaxStamina; }
+	FORCEINLINE void SetStamina(float Amount) { Stamina = Amount; }
 
 };
