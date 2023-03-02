@@ -14,6 +14,7 @@ class UInputMappingContext;
 class UInputAction;
 class ABaseWeapon;
 class UCombatComp;
+class UBuffComponent;
 class ASleedPlayerController;
 
 UCLASS()
@@ -78,13 +79,13 @@ private:
 	// Jump Logic
 	//
 	//
-	UPROPERTY(EditAnywhere, Category = "Jump")
+	UPROPERTY(EditAnywhere, Category = "Player Stats")
 	float firstJumpHeight = 420.f;
 
-	UPROPERTY(EditAnywhere, Category = "Jump")
+	UPROPERTY(EditAnywhere, Category = "Player Stats")
 	float secondJumpHeight = 600.f;
 
-	UPROPERTY(EditAnywhere, Category = "Jump")
+	UPROPERTY(EditAnywhere, Category = "Player Stats")
 	float JumpCost = 20.f;
 
 	UPROPERTY(Replicated)
@@ -107,6 +108,12 @@ private:
 	//
 	UPROPERTY(VisibleAnywhere)
 	UCombatComp* Combat;
+
+	// Buff Component logic
+	//
+	//
+	UPROPERTY(VisibleAnywhere)
+	UBuffComponent* Buff;
 
 	// Character Attributes
 	//

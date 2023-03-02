@@ -8,12 +8,10 @@ UBuffComponent::UBuffComponent()
 	PrimaryComponentTick.bCanEverTick = true;
 }
 
-
 void UBuffComponent::BeginPlay()
 {
 	Super::BeginPlay();
 }
-
 
 void UBuffComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {

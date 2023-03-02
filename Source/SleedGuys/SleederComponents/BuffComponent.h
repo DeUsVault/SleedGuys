@@ -6,6 +6,8 @@
 #include "Components/ActorComponent.h"
 #include "BuffComponent.generated.h"
 
+class ASleedCharacter;
+
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class SLEEDGUYS_API UBuffComponent : public UActorComponent
@@ -14,10 +16,15 @@ class SLEEDGUYS_API UBuffComponent : public UActorComponent
 
 public:	
 	UBuffComponent();
+	friend class ASleedCharacter;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 protected:
 	virtual void BeginPlay() override;
+
+private:
+	UPROPERTY()
+	ASleedCharacter* Character;
 
 public:	
 

@@ -8,6 +8,7 @@
 #include "Net/UnrealNetwork.h"
 #include "SleedGuys/Weapon/BaseWeapon.h"
 #include "SleedGuys/SleederComponents/CombatComp.h"
+#include "SleedGuys/SleederComponents/BuffComponent.h"
 #include "SleedGuys/PlayerController/SleedPlayerController.h"
 
 #include "Components/InputComponent.h"
@@ -41,6 +42,9 @@ ASleedCharacter::ASleedCharacter()
 
 	Combat = CreateDefaultSubobject<UCombatComp>(TEXT("CombatComponent"));
 	Combat->SetIsReplicated(true);
+
+	Buff = CreateDefaultSubobject<UBuffComponent>(TEXT("BuffComponent"));
+	Buff->SetIsReplicated(true);
 }
 
 void ASleedCharacter::BeginPlay()
@@ -101,6 +105,10 @@ void ASleedCharacter::PostInitializeComponents()
 	if (Combat)
 	{
 		Combat->Character = this;
+	}
+	if (Buff)
+	{
+		Buff->Character = this;
 	}
 }
 
