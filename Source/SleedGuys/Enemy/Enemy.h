@@ -7,6 +7,8 @@
 #include "SleedGuys/Enums/CharacterEnums.h"
 #include "Enemy.generated.h"
 
+class AAIController;
+
 UCLASS()
 class SLEEDGUYS_API AEnemy : public ACharacter
 {
@@ -24,6 +26,19 @@ protected:
 	EDeathPose DeathPose = EDeathPose::EDP_Alive;
 
 private:
+	/**
+	* Navigation
+	*/
+
+	UPROPERTY()
+	AAIController* EnemyController;
+
+	// Current patrol target
+	UPROPERTY(EditInstanceOnly, Category = "AI Navigation")
+	AActor* PatrolTarget;
+
+	UPROPERTY(EditInstanceOnly, Category = "AI Navigation")
+	TArray<AActor*> PatrolTargets;
 
 public:	
 
