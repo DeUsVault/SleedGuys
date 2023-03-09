@@ -22,6 +22,8 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
+	bool InTargetRange(AActor* Target, double Radius);
+
 	UPROPERTY(BlueprintReadOnly)
 	EDeathPose DeathPose = EDeathPose::EDP_Alive;
 
@@ -39,6 +41,9 @@ private:
 
 	UPROPERTY(EditInstanceOnly, Category = "AI Navigation")
 	TArray<AActor*> PatrolTargets;
+
+	UPROPERTY(EditAnywhere)
+	double PatrolRadius = 200.f;
 
 public:	
 
