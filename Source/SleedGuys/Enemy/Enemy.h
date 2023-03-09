@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "SleedGuys/Enums/CharacterEnums.h"
 #include "Enemy.generated.h"
 
 UCLASS()
@@ -18,6 +19,11 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+
+	UPROPERTY(BlueprintReadOnly)
+	EDeathPose DeathPose = EDeathPose::EDP_Alive;
+
+private:
 
 public:	
 

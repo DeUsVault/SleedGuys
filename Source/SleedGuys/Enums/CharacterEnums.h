@@ -9,3 +9,10 @@ enum class EWeaponState : uint8
 
 	EWS_MAX UMETA(DisplayName = "DefaultMAX")
 };
+
+UENUM(BlueprintType)
+enum class EDeathPose : uint8
+{
+	EDP_Alive UMETA(DisplayName = "Alive"),
+	EDP_Dead UMETA(DisplayName = "Dead")
+};
