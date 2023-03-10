@@ -8,6 +8,7 @@
 #include "Enemy.generated.h"
 
 class AAIController;
+class UPawnSensingComponent;
 
 UCLASS()
 class SLEEDGUYS_API AEnemy : public ACharacter
@@ -24,12 +25,18 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
+	UPROPERTY(BlueprintReadOnly)
+	EDeathPose DeathPose = EDeathPose::EDP_Alive;
+
+	/**
+	* Ai logic - Navigation
+	*/
 	bool InTargetRange(AActor* Target, double Radius);
 	void MoveToTarget(AActor* Target);
 	AActor* ChoosePatrolTarget();
 
-	UPROPERTY(BlueprintReadOnly)
-	EDeathPose DeathPose = EDeathPose::EDP_Alive;
+	UFUNCTION()
+	void PawnSeen(APawn* SeenPawn);
 
 private:
 	/**
@@ -57,6 +64,12 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "AI Navigation")
 	float WaitMax = 10.f;
+
+	/*
+	* Components
+	*/
+	UPROPERTY(VisibleAnywhere)
+	UPawnSensingComponent* PawnSensing;
 
 public:	
 
