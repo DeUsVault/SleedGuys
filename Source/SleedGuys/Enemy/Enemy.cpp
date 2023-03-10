@@ -7,6 +7,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "AIController.h"
 #include "Perception/PawnSensingComponent.h"
+#include "SleedGuys/Spells/Spell.h"
 
 AEnemy::AEnemy()
 {
@@ -162,7 +163,14 @@ void AEnemy::PawnSeen(APawn* SeenPawn)
 }
 
 void AEnemy::Attack()
-{
+{	
 	UE_LOG(LogTemp, Warning, TEXT("Attack"));
+	if (CurrentSpell != nullptr) return;
+
+	if (Spell)
+	{
+		CurrentSpell = GetWorld()->SpawnActor<ASpell>(Spell, GetActorTransform());
+		CurrentSpell->setSpellCaster(this);
+	}
 }
 

@@ -9,6 +9,7 @@
 
 class AAIController;
 class UPawnSensingComponent;
+class ASpell;
 
 UCLASS()
 class SLEEDGUYS_API AEnemy : public ACharacter
@@ -39,6 +40,15 @@ protected:
 
 	UFUNCTION()
 	void PawnSeen(APawn* SeenPawn);
+
+	/**
+	* Spells
+	*/
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<ASpell> Spell; // set the spell from blueprint
+
+	UPROPERTY()
+	ASpell* CurrentSpell; // store the spell to this variable
 
 private:
 	/**
