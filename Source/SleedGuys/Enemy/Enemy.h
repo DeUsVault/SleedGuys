@@ -22,6 +22,7 @@ public:
 
 	void CheckCombatTarget();
 	void CheckPatrolTarget();
+	void Attack();
 
 protected:
 	virtual void BeginPlay() override;
@@ -78,6 +79,9 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Combat")
 	double CombatRadius = 800.f;
+
+	UPROPERTY(EditAnywhere, Category = "Combat")
+	double AttackRadius = 300.f;
 
 	UPROPERTY(EditAnywhere, Category = "Combat")
 	float ChasingSpeed = 300.f;
