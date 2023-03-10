@@ -63,6 +63,8 @@ void ASleedCharacter::BeginPlay()
 		SleedPlayerController->SetHUDHealth(Health, MaxHealth);
 		SleedPlayerController->SetHUDStamina(Stamina, MaxStamina);
 	}
+
+	Tags.Add(FName("SleedCharacter"));
 }
 
 void ASleedCharacter::Tick(float DeltaTime)

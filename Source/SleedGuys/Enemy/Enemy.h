@@ -20,6 +20,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	void CheckCombatTarget();
 	void CheckPatrolTarget();
 
 protected:
@@ -46,9 +47,8 @@ private:
 	UPROPERTY()
 	AAIController* EnemyController;
 
-	// Current patrol target
 	UPROPERTY(EditInstanceOnly, Category = "AI Navigation")
-	AActor* PatrolTarget;
+	AActor* PatrolTarget; // Current patrol target
 
 	UPROPERTY(EditInstanceOnly, Category = "AI Navigation")
 	TArray<AActor*> PatrolTargets;
@@ -64,6 +64,23 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "AI Navigation")
 	float WaitMax = 10.f;
+
+	EEnemyState EnemyState = EEnemyState::EES_Patrolling;
+
+	UPROPERTY(EditAnywhere, Category = "AI Navigation")
+	float PatrolSpeed = 150.f;
+
+	/**
+	* Combat logic
+	*/
+	UPROPERTY()
+	AActor* CombatTarget;
+
+	UPROPERTY(EditAnywhere, Category = "Combat")
+	double CombatRadius = 800.f;
+
+	UPROPERTY(EditAnywhere, Category = "Combat")
+	float ChasingSpeed = 300.f;
 
 	/*
 	* Components
