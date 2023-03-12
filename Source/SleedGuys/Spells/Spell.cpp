@@ -3,6 +3,8 @@
 
 #include "Spell.h"
 #include "Components/SphereComponent.h"
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraComponent.h"
 
 ASpell::ASpell()
 {
@@ -16,6 +18,9 @@ ASpell::ASpell()
 	OverlapSphere->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	OverlapSphere->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 	OverlapSphere->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
+
+	SpellEffectComponent = CreateDefaultSubobject<UNiagaraComponent>(TEXT("SpellEffectComponent"));
+	SpellEffectComponent->SetupAttachment(RootComponent);
 }
 
 void ASpell::BeginPlay()
@@ -24,7 +29,6 @@ void ASpell::BeginPlay()
 
 	if (HasAuthority())
 	{
-		// we delay the overlap binding because, if it spawns and we are already overlapping it, then pickup is destroyed before it's other functionalities are implemented
 		GetWorldTimerManager().SetTimer(
 			BindSpellTimer,
 			this,

@@ -30,6 +30,8 @@ public:
 
 	virtual void PostInitializeComponents() override;
 
+	virtual void Landed(const FHitResult& Hit) override;
+
 	/* 
 	*	Callbacks for input 
 	*/

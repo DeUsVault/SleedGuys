@@ -7,6 +7,7 @@
 #include "Spell.generated.h"
 
 class USphereComponent;
+class UNiagaraComponent;
 
 UCLASS()
 class SLEEDGUYS_API ASpell : public AActor
@@ -33,6 +34,9 @@ protected:
 private:
 	UPROPERTY(EditAnywhere)
 	USphereComponent* OverlapSphere;
+
+	UPROPERTY(VisibleAnywhere)
+	UNiagaraComponent* SpellEffectComponent;
 
 	UPROPERTY(EditAnywhere)
 	float SpellSphereRadius = 300.f;

@@ -49,6 +49,8 @@ void AEnemy::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if (EnemyState == EEnemyState::EES_Spellcasting) return; // we dont want enemy to do anything else
+
 	if (EnemyState > EEnemyState::EES_Patrolling)
 	{
 		CheckCombatTarget();
@@ -78,7 +80,7 @@ void AEnemy::CheckCombatTarget()
 	{
 		// Outside attack range, chase character if we arent already doing so
 		EnemyState = EEnemyState::EES_Chasing;
-		GetCharacterMovement()->MaxWalkSpeed = 300.f;
+		GetCharacterMovement()->MaxWalkSpeed = ChasingSpeed;
 		MoveToTarget(CombatTarget);
 		UE_LOG(LogTemp, Warning, TEXT("Chase Player"));
 	}
@@ -147,28 +149,27 @@ void AEnemy::PatrolTimerFinished()
 
 void AEnemy::PawnSeen(APawn* SeenPawn)
 {
-	if (EnemyState == EEnemyState::EES_Chasing) return;
-	if (SeenPawn->ActorHasTag(FName("SleedCharacter")))
-	{
+	if (EnemyState != EEnemyState::EES_Chasing
+		&& EnemyState != EEnemyState::EES_Attacking
+		&& EnemyState != EEnemyState::EES_Spellcasting
+		&& SeenPawn->ActorHasTag(FName("SleedCharacter")))
+	{	
+		CombatTarget = SeenPawn;
 		GetWorldTimerManager().ClearTimer(PatrolTimer);
 		GetCharacterMovement()->MaxWalkSpeed = ChasingSpeed;
-		CombatTarget = SeenPawn;
-		
-		if (EnemyState != EEnemyState::EES_Attacking)
-		{
-			EnemyState = EEnemyState::EES_Chasing;
-			MoveToTarget(CombatTarget);
-		}
+		EnemyState = EEnemyState::EES_Chasing;
+		MoveToTarget(CombatTarget);
 	}
 }
 
 void AEnemy::Attack()
 {	
-	UE_LOG(LogTemp, Warning, TEXT("Attack"));
 	if (CurrentSpell != nullptr) return;
 
 	if (Spell)
-	{
+	{	
+		EnemyState = EEnemyState::EES_Spellcasting;
+		EnemyController->StopMovement();
 		CurrentSpell = GetWorld()->SpawnActor<ASpell>(Spell, GetActorTransform());
 		CurrentSpell->setSpellCaster(this);
 	}

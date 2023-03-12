@@ -210,6 +210,11 @@ void ASleedCharacter::Jump()
 	Super::Jump();
 }
 
+void ASleedCharacter::Landed(const FHitResult& Hit)
+{
+	bShouldDoubleJump = false;
+}
+
 void ASleedCharacter::EquipButtonPressed()
 {
 	if (Combat)
