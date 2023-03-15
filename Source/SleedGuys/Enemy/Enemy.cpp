@@ -9,6 +9,8 @@
 #include "Perception/PawnSensingComponent.h"
 #include "SleedGuys/Spells/Spell.h"
 
+#include "Net/UnrealNetwork.h"
+
 AEnemy::AEnemy()
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -64,6 +66,13 @@ void AEnemy::Tick(float DeltaTime)
 void AEnemy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
+}
+
+void AEnemy::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(AEnemy, EnemyState);
 }
 
 void AEnemy::CheckCombatTarget()

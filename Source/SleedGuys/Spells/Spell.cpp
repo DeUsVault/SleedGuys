@@ -51,6 +51,22 @@ void ASpell::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* O
 void ASpell::BindSpellTimerFinished()
 {
 	OverlapSphere->OnComponentBeginOverlap.AddDynamic(this, &ASpell::OnSphereOverlap);
+	if (GEngine)
+		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Some debug message!"));
+
+	TArray<AActor*> Result;
+	GetOverlappingActors(Result);
+	if(Result.Num() > 0)
+	{
+		for (auto Actor : Result)
+		{
+			if (Actor && Actor->ActorHasTag(FName("SleedCharacter")))
+			{
+				Actor->Destroy();
+			}
+		}
+	}
+	Destroy();
 }
 
 void ASpell::setSpellCaster(AActor* Caster)
