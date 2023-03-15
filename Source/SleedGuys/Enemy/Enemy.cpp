@@ -51,8 +51,6 @@ void AEnemy::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (EnemyState == EEnemyState::EES_Spellcasting) return; // we dont want enemy to do anything else
-
 	if (EnemyState > EEnemyState::EES_Patrolling)
 	{
 		CheckCombatTarget();
@@ -160,7 +158,6 @@ void AEnemy::PawnSeen(APawn* SeenPawn)
 {
 	if (EnemyState != EEnemyState::EES_Chasing
 		&& EnemyState != EEnemyState::EES_Attacking
-		&& EnemyState != EEnemyState::EES_Spellcasting
 		&& SeenPawn->ActorHasTag(FName("SleedCharacter")))
 	{	
 		CombatTarget = SeenPawn;
@@ -173,14 +170,6 @@ void AEnemy::PawnSeen(APawn* SeenPawn)
 
 void AEnemy::Attack()
 {	
-	if (CurrentSpell != nullptr) return;
-
-	if (Spell)
-	{	
-		EnemyState = EEnemyState::EES_Spellcasting;
-		EnemyController->StopMovement();
-		CurrentSpell = GetWorld()->SpawnActor<ASpell>(Spell, GetActorTransform());
-		CurrentSpell->setSpellCaster(this);
-	}
+	
 }
 

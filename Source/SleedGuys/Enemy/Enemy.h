@@ -9,7 +9,6 @@
 
 class AAIController;
 class UPawnSensingComponent;
-class ASpell;
 
 UCLASS()
 class SLEEDGUYS_API AEnemy : public ACharacter
@@ -24,40 +23,44 @@ public:
 
 	void CheckCombatTarget();
 	void CheckPatrolTarget();
-	void Attack();
+	virtual void Attack();
 
 protected:
 	virtual void BeginPlay() override;
 
+	UPROPERTY()
+	AAIController* EnemyController;
+
 	UPROPERTY(BlueprintReadOnly)
 	EDeathPose DeathPose = EDeathPose::EDP_Alive;
+
+	UPROPERTY(BlueprintReadOnly, Replicated)
+	EEnemyState EnemyState = EEnemyState::EES_Patrolling;
 
 	/**
 	* Ai logic - Navigation
 	*/
+	FTimerHandle PatrolTimer;
 	bool InTargetRange(AActor* Target, double Radius);
 	void MoveToTarget(AActor* Target);
 	AActor* ChoosePatrolTarget();
 
 	UFUNCTION()
-	void PawnSeen(APawn* SeenPawn);
+	virtual void PawnSeen(APawn* SeenPawn);
 
 	/**
-	* Spells
+	* Combat logic
 	*/
-	UPROPERTY(EditAnywhere)
-	TSubclassOf<ASpell> Spell; // set the spell from blueprint
-
 	UPROPERTY()
-	ASpell* CurrentSpell; // store the spell to this variable
+	AActor* CombatTarget;
+
+	UPROPERTY(EditAnywhere, Category = "Combat")
+	float ChasingSpeed = 300.f;
 
 private:
 	/**
 	* Navigation
 	*/
-
-	UPROPERTY()
-	AAIController* EnemyController;
 
 	UPROPERTY(EditInstanceOnly, Category = "AI Navigation")
 	AActor* PatrolTarget; // Current patrol target
@@ -68,7 +71,6 @@ private:
 	UPROPERTY(EditAnywhere)
 	double PatrolRadius = 200.f;
 
-	FTimerHandle PatrolTimer;
 	void PatrolTimerFinished();
 
 	UPROPERTY(EditAnywhere, Category = "AI Navigation")
@@ -77,26 +79,14 @@ private:
 	UPROPERTY(EditAnywhere, Category = "AI Navigation")
 	float WaitMax = 10.f;
 
-	UPROPERTY(BlueprintReadOnly, Replicated, meta = (AllowPrivateAccess = "true"))
-	EEnemyState EnemyState = EEnemyState::EES_Patrolling;
-
 	UPROPERTY(EditAnywhere, Category = "AI Navigation")
 	float PatrolSpeed = 150.f;
-
-	/**
-	* Combat logic
-	*/
-	UPROPERTY()
-	AActor* CombatTarget;
 
 	UPROPERTY(EditAnywhere, Category = "Combat")
 	double CombatRadius = 800.f;
 
 	UPROPERTY(EditAnywhere, Category = "Combat")
 	double AttackRadius = 300.f;
-
-	UPROPERTY(EditAnywhere, Category = "Combat")
-	float ChasingSpeed = 300.f;
 
 	/*
 	* Components
