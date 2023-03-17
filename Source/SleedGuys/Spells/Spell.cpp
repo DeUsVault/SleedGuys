@@ -52,7 +52,7 @@ void ASpell::BindSpellTimerFinished()
 {
 	OverlapSphere->OnComponentBeginOverlap.AddDynamic(this, &ASpell::OnSphereOverlap);
 	if (GEngine)
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Some debug message!"));
+		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Spell Timer Finished!"));
 
 	TArray<AActor*> Result;
 	GetOverlappingActors(Result);

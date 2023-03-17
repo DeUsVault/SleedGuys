@@ -61,7 +61,6 @@ private:
 	/**
 	* Navigation
 	*/
-
 	UPROPERTY(EditInstanceOnly, Category = "AI Navigation")
 	AActor* PatrolTarget; // Current patrol target
 
@@ -82,6 +81,9 @@ private:
 	UPROPERTY(EditAnywhere, Category = "AI Navigation")
 	float PatrolSpeed = 150.f;
 
+	/**
+	* Combat logic
+	*/
 	UPROPERTY(EditAnywhere, Category = "Combat")
 	double CombatRadius = 800.f;
 

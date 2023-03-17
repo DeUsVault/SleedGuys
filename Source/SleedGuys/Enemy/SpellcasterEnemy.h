@@ -22,6 +22,8 @@ public:
 	virtual void Attack() override;
 
 protected:
+	virtual void PawnSeen(APawn* SeenPawn) override;
+
 	/**
 	* Spells
 	*/
@@ -30,7 +32,5 @@ protected:
 
 	UPROPERTY()
 	ASpell* CurrentSpell; // store the spell to this variable
-
-	virtual void PawnSeen(APawn* SeenPawn) override;
 	
 };

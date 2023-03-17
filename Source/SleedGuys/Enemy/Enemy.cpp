@@ -7,7 +7,6 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "AIController.h"
 #include "Perception/PawnSensingComponent.h"
-#include "SleedGuys/Spells/Spell.h"
 
 #include "Net/UnrealNetwork.h"
 
