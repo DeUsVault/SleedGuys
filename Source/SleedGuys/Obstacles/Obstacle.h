@@ -31,6 +31,15 @@ private:
     UPROPERTY(EditAnywhere, Category = "Obstacle Movement")
     float Distance = 200.f;
 
+	UPROPERTY(EditAnywhere, Category = "Obstacle Movement")
+	bool bMoveOnX = false;
+
+	UPROPERTY(EditAnywhere, Category = "Obstacle Movement")
+	bool bMoveOnY = false;
+
+	UPROPERTY(EditAnywhere, Category = "Obstacle Movement")
+	bool bMoveOnZ = true;
+
 	void MoveUpDown(float DeltaTime);
 
 public:	

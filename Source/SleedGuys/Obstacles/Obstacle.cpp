@@ -30,7 +30,16 @@ void AObstacle::Tick(float DeltaTime)
 void AObstacle::MoveUpDown(float DeltaTime)
 {
 	CurrentLocation = GetActorLocation();
-    CurrentLocation = FVector(CurrentLocation.X, CurrentLocation.Y, CurrentLocation.Z + (Speed * DeltaTime));
+
+    float LocationX = CurrentLocation.X;
+    float LocationY = CurrentLocation.Y;
+    float LocationZ = CurrentLocation.Z;
+
+    if (bMoveOnX) LocationX = LocationX + (Speed * DeltaTime);
+    if (bMoveOnY) LocationY = LocationY + (Speed * DeltaTime);
+    if (bMoveOnZ) LocationZ = LocationZ + (Speed * DeltaTime);
+
+    CurrentLocation = FVector(LocationX, LocationY, LocationZ);
     SetActorLocation(CurrentLocation);
 
     float DistanceMoved = FVector::Dist(StartLocation, CurrentLocation);
