@@ -24,10 +24,10 @@ void AObstacle::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-    MoveUpDown(DeltaTime);
+    MoveOnAxis(DeltaTime);
 }
 
-void AObstacle::MoveUpDown(float DeltaTime)
+void AObstacle::MoveOnAxis(float DeltaTime)
 {
 	CurrentLocation = GetActorLocation();
 

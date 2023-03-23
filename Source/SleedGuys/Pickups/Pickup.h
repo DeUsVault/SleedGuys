@@ -33,7 +33,9 @@ protected:
 	);
 
 private:
-
+	//
+	// pickup logic on overlap
+	//
 	UPROPERTY(EditAnywhere)
 	USphereComponent* OverlapSphere;
 
@@ -47,6 +49,31 @@ private:
 	float BindOverlapTime = 0.25f;
 	void BindOverlapTimerFinished();
 
+	//
+	// movable object logic
+	//
+	UPROPERTY(EditAnywhere, Category = "Movement")
+	bool bAllowMovement = false;
+
+	FVector StartLocation;
+	FVector CurrentLocation;
+
+	UPROPERTY(EditAnywhere, Category = "Movement")
+	float Speed = 200.f;
+
+	UPROPERTY(EditAnywhere, Category = "Movement")
+	float Distance = 200.f;
+
+	UPROPERTY(EditAnywhere, Category = "Movement")
+	bool bMoveOnX = false;
+
+	UPROPERTY(EditAnywhere, Category = "Movement")
+	bool bMoveOnY = false;
+
+	UPROPERTY(EditAnywhere, Category = "Movement")
+	bool bMoveOnZ = true;
+
+	void MoveOnAxis(float DeltaTime);
 public:	
 
 };

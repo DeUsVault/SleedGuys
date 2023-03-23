@@ -40,7 +40,7 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Obstacle Movement")
 	bool bMoveOnZ = true;
 
-	void MoveUpDown(float DeltaTime);
+	void MoveOnAxis(float DeltaTime);
 
 public:	
 

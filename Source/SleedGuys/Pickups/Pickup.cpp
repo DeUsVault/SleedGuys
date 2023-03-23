@@ -40,11 +40,18 @@ void APickup::BeginPlay()
 			BindOverlapTime
 		);
 	}
+
+	StartLocation = GetActorLocation();
 }
 
 void APickup::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	if (bAllowMovement)
+	{
+		MoveOnAxis(DeltaTime);
+	}
 }
 
 void APickup::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
@@ -55,6 +62,29 @@ void APickup::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* 
 void APickup::BindOverlapTimerFinished()
 {
 	OverlapSphere->OnComponentBeginOverlap.AddDynamic(this, &APickup::OnSphereOverlap);
+}
+
+void APickup::MoveOnAxis(float DeltaTime)
+{
+	CurrentLocation = GetActorLocation();
+
+	float LocationX = CurrentLocation.X;
+	float LocationY = CurrentLocation.Y;
+	float LocationZ = CurrentLocation.Z;
+
+	if (bMoveOnX) LocationX = LocationX + (Speed * DeltaTime);
+	if (bMoveOnY) LocationY = LocationY + (Speed * DeltaTime);
+	if (bMoveOnZ) LocationZ = LocationZ + (Speed * DeltaTime);
+
+	CurrentLocation = FVector(LocationX, LocationY, LocationZ);
+	SetActorLocation(CurrentLocation);
+
+	float DistanceMoved = FVector::Dist(StartLocation, CurrentLocation);
+	if (DistanceMoved >= Distance)
+	{
+		Speed = -Speed;
+		StartLocation = CurrentLocation;
+	}
 }
 
 void APickup::Destroyed()
