@@ -165,6 +165,15 @@ private:
 	UFUNCTION(Server, Reliable)
 	void ServerSprint(float Speed, bool breduceStamina);
 
+	//
+	// Coins
+	//
+	UPROPERTY(ReplicatedUsing = OnRep_Gold, VisibleAnywhere, Category = "Resources")
+	int32 Gold;
+
+	UFUNCTION()
+	void OnRep_Gold();
+
 public:
 	// Place for Getters/Setters only
 	//
@@ -176,5 +185,7 @@ public:
 	FORCEINLINE float GetStamina() const { return Stamina; }
 	FORCEINLINE float GetMaxStamina() const { return MaxStamina; }
 	FORCEINLINE void SetStamina(float Amount) { Stamina = Amount; }
+	void AddGold(int32 AmountOfGold);
+	FORCEINLINE int32 GetGold() const { return Gold; }
 
 };

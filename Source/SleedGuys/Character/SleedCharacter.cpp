@@ -99,6 +99,7 @@ void ASleedCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutL
 	DOREPLIFETIME(ASleedCharacter, bShouldDoubleJump);
 	DOREPLIFETIME(ASleedCharacter, Health);
 	DOREPLIFETIME(ASleedCharacter, Stamina);
+	DOREPLIFETIME(ASleedCharacter, Gold);
 }
 
 void ASleedCharacter::PostInitializeComponents()
@@ -273,5 +274,34 @@ void ASleedCharacter::ServerSprint_Implementation(float Speed, bool breduceStami
 	if (breduceStamina)
 	{
 		Stamina = FMath::Clamp(Stamina - SprintCost, 0.f, MaxStamina);
+	}
+}
+
+void ASleedCharacter::AddGold(int32 AmountOfGold)
+{
+	Gold += AmountOfGold;
+	if (HasAuthority())
+	{
+		if (GEngine)
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("authority"));
+			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::FromInt(AmountOfGold));
+		}
+	}
+	else 
+	{
+		if (GEngine)
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Blue, TEXT("noobie"));
+			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Blue, FString::FromInt(AmountOfGold));
+		}
+	}
+}
+
+void ASleedCharacter::OnRep_Gold()
+{
+	if (GEngine)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, TEXT("replicatingggg"));
 	}
 }
