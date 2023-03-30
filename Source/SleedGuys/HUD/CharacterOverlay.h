@@ -29,5 +29,8 @@ public:
 
 	UPROPERTY(meta = (BindWidget))
 	UTextBlock* StaminaText;
+
+	UPROPERTY(meta = (BindWidget))
+	class UTextBlock* CoinText;
 	
 };

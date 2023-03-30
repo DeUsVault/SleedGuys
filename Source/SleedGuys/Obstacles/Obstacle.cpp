@@ -24,7 +24,10 @@ void AObstacle::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-    MoveOnAxis(DeltaTime);
+    if (bAllowMovement)
+    {
+        MoveOnAxis(DeltaTime);
+    }
 }
 
 void AObstacle::MoveOnAxis(float DeltaTime)

@@ -47,3 +47,17 @@ void ASleedPlayerController::SetHUDStamina(float Stamina, float MaxStamina)
 	}
 }
 
+void ASleedPlayerController::SetHUDGold(int32 CoinsNum)
+{
+	SleedHUD = SleedHUD == nullptr ? Cast<ASleedHUD>(GetHUD()) : SleedHUD;
+
+	bool bHUDValid = SleedHUD &&
+		SleedHUD->CharacterOverlay &&
+		SleedHUD->CharacterOverlay->CoinText;
+	if (bHUDValid)
+	{
+		FString CoinText = FString::FromInt(CoinsNum);
+		SleedHUD->CharacterOverlay->CoinText->SetText(FText::FromString(CoinText));
+	}
+}
+

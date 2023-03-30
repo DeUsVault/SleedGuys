@@ -174,6 +174,8 @@ private:
 	UFUNCTION()
 	void OnRep_Gold();
 
+	void UpdateHUDGold();
+
 public:
 	// Place for Getters/Setters only
 	//

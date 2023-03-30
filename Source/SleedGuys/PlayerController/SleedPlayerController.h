@@ -19,6 +19,7 @@ class SLEEDGUYS_API ASleedPlayerController : public APlayerController
 public:
 	void SetHUDHealth(float Health, float MaxHealth);
 	void SetHUDStamina(float Stamina, float MaxStamina);
+	void SetHUDGold(int32 CoinsNum);
 protected:
 	virtual void BeginPlay() override;
 

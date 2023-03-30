@@ -178,6 +178,16 @@ void ASleedCharacter::Move(const FInputActionValue& Value)
 	AddMovementInput(ForwardDirection, MovementVector.Y);
 	const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 	AddMovementInput(RightDirection, MovementVector.X);
+
+	/*const FVector2D MovementVector = Value.Get<FVector2D>();
+
+	const FRotator Rotation = GetActorRotation();
+	const FRotator YawRotation(0.f, Rotation.Yaw, 0.f);
+
+	const FVector ForwardDirection = GetActorForwardVector();
+	AddMovementInput(ForwardDirection, MovementVector.Y);
+	const FVector RightDirection = FVector::CrossProduct(ForwardDirection, FVector(0.f, 0.f, 1.f));
+	AddMovementInput(RightDirection, MovementVector.X);*/
 }
 
 void ASleedCharacter::Look(const FInputActionValue& Value)
@@ -280,6 +290,7 @@ void ASleedCharacter::ServerSprint_Implementation(float Speed, bool breduceStami
 void ASleedCharacter::AddGold(int32 AmountOfGold)
 {
 	Gold += AmountOfGold;
+	UpdateHUDGold(); // coin pickup happens only on the server
 	if (HasAuthority())
 	{
 		if (GEngine)
@@ -303,5 +314,15 @@ void ASleedCharacter::OnRep_Gold()
 	if (GEngine)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, TEXT("replicatingggg"));
+	}
+	UpdateHUDGold();
+}
+
+void ASleedCharacter::UpdateHUDGold()
+{
+	SleedPlayerController = SleedPlayerController == nullptr ? Cast<ASleedPlayerController>(Controller) : SleedPlayerController;
+	if (SleedPlayerController)
+	{
+		SleedPlayerController->SetHUDGold(Gold);
 	}
 }

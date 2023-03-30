@@ -25,6 +25,9 @@ private:
 	FVector StartLocation;
 	FVector CurrentLocation;
 
+	UPROPERTY(EditAnywhere, Category = "Movement")
+	bool bAllowMovement = true;
+
     UPROPERTY(EditAnywhere, Category = "Obstacle Movement")
     float Speed = 200.f;
 
