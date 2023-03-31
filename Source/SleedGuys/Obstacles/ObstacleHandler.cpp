@@ -25,9 +25,10 @@ void AObstacleHandler::BeginPlay()
 				if (ObstacleCollectionNumber > 0)
 				{
 					SelectionOne = FMath::RandRange(0, ObstacleCollectionNumber - 1);
-					ObstacleCollection->HandleObstacles(SelectionOne, PreviousSelectionOne, bFirstIteration);
+					ObstacleCollection->HandleObstacles(bFirstIteration, SelectionOne, PreviousSelectionOne);
 
 					bFirstIteration = false;
+					PreviousSelectionOne = SelectionOne;
 				}
 			}
 			else
@@ -35,9 +36,16 @@ void AObstacleHandler::BeginPlay()
 				int32 ObstacleCollectionNumber = ObstacleCollection->ObstacleArray.Num();
 				if (ObstacleCollectionNumber > 0)
 				{	
-					PreviousSelectionOne = SelectionOne;
-					SelectionOne = FMath::RandRange(0, ObstacleCollectionNumber - 1);
-					ObstacleCollection->HandleObstacles(SelectionOne, PreviousSelectionOne, bFirstIteration);
+					// Calculate the minimum and maximum values for the new selection
+					int32 MinSelection = FMath::Max(PreviousSelectionOne - 1, 0);
+					int32 MaxSelection = FMath::Min(PreviousSelectionOne + 1, ObstacleCollectionNumber - 1);
+
+					// Select a random number within the range of MinSelection to MaxSelection
+					int32 NewSelection = FMath::RandRange(MinSelection, MaxSelection);
+
+					ObstacleCollection->HandleObstacles(bFirstIteration, NewSelection, PreviousSelectionOne);
+
+					PreviousSelectionOne = NewSelection;
 				}
 			}
 		}
