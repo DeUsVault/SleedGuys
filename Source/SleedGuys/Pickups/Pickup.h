@@ -74,6 +74,17 @@ private:
 	bool bMoveOnZ = true;
 
 	void MoveOnAxis(float DeltaTime);
+
+	//
+	// rotate object logic
+	//
+	UPROPERTY(EditAnywhere, Category = "Custom Rotation")
+	bool bAllowRotation = false;
+
+	UPROPERTY(EditAnywhere, Category = "Custom Rotation")
+	float RotationSpeed = 200.f;
+
+	void RotateActor(float DeltaTime);
 public:	
 
 };

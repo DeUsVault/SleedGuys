@@ -52,6 +52,11 @@ void APickup::Tick(float DeltaTime)
 	{
 		MoveOnAxis(DeltaTime);
 	}
+
+	if (bAllowRotation)
+	{
+		RotateActor(DeltaTime);
+	}
 }
 
 void APickup::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
@@ -85,6 +90,15 @@ void APickup::MoveOnAxis(float DeltaTime)
 		Speed = -Speed;
 		StartLocation = CurrentLocation;
 	}
+}
+
+void APickup::RotateActor(float DeltaTime)
+{
+	FRotator Rotation = RootComponent->GetRelativeRotation();
+
+	Rotation.Yaw += RotationSpeed * DeltaTime; // Rotate around X-axis
+
+	RootComponent->SetRelativeRotation(Rotation);
 }
 
 void APickup::Destroyed()
