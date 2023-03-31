@@ -2,6 +2,7 @@
 
 
 #include "Obstacle.h"
+#include "Components/BoxComponent.h"
 
 AObstacle::AObstacle()
 {
@@ -9,8 +10,15 @@ AObstacle::AObstacle()
 	bReplicates = true;
 
 	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
-	ObstacleMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ObstacleMesh"));
-	ObstacleMesh->SetupAttachment(RootComponent);
+
+    ObstacleMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ObstacleMesh"));
+    ObstacleMesh->SetupAttachment(RootComponent);
+
+    OverlapBox = CreateDefaultSubobject<UBoxComponent>(TEXT("OverlapBox"));
+    OverlapBox->SetupAttachment(ObstacleMesh);
+    OverlapBox->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+    OverlapBox->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+    OverlapBox->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
 }
 
 void AObstacle::BeginPlay()

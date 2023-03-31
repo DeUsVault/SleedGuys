@@ -6,6 +6,8 @@
 #include "GameFramework/Actor.h"
 #include "Obstacle.generated.h"
 
+class UBoxComponent;
+
 UCLASS()
 class SLEEDGUYS_API AObstacle : public AActor
 {
@@ -19,6 +21,9 @@ protected:
 	virtual void BeginPlay() override;
 
 private:
+	UPROPERTY(EditAnywhere)
+	UBoxComponent* OverlapBox;
+
 	UPROPERTY(EditAnywhere)
 	UStaticMeshComponent* ObstacleMesh;
 
