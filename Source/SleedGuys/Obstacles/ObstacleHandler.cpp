@@ -25,10 +25,25 @@ void AObstacleHandler::BeginPlay()
 				if (ObstacleCollectionNumber > 0)
 				{
 					SelectionOne = FMath::RandRange(0, ObstacleCollectionNumber - 1);
-					ObstacleCollection->HandleObstacles(bFirstIteration, SelectionOne, PreviousSelectionOne);
+
+					// Select the second random number 
+					if ((ObstacleCollectionNumber - 1) > 0) // we need to have more than one possible selections else we will loop forever
+					{
+						do
+						{
+							SelectionTwo = FMath::RandRange(0, ObstacleCollectionNumber - 1);
+						} while (SelectionTwo == SelectionOne);
+					}
+					else
+					{
+						SelectionTwo = SelectionOne;
+					}
+
+					ObstacleCollection->HandleObstacles(bFirstIteration, SelectionOne, SelectionTwo);
 
 					bFirstIteration = false;
 					PreviousSelectionOne = SelectionOne;
+					PreviousSelectionTwo = SelectionTwo;
 				}
 			}
 			else
@@ -41,11 +56,58 @@ void AObstacleHandler::BeginPlay()
 					int32 MaxSelection = FMath::Min(PreviousSelectionOne + 1, ObstacleCollectionNumber - 1);
 
 					// Select a random number within the range of MinSelection to MaxSelection
-					int32 NewSelection = FMath::RandRange(MinSelection, MaxSelection);
+					SelectionOne = FMath::RandRange(MinSelection, MaxSelection);
+					// Select the second random number 
+					if (PreviousSelectionOne == PreviousSelectionTwo)
+					{
+						if ((MaxSelection - MinSelection) > 0)
+						{
+							do
+							{
+								SelectionTwo = FMath::RandRange(MinSelection, MaxSelection);
+							} while (SelectionTwo == SelectionOne);
+						}
+						else
+						{
+							SelectionTwo = SelectionOne;
+						}
+					}
+					else
+					{
+						// Calculate the minimum and maximum values for the new selection
+						MinSelection = FMath::Max(PreviousSelectionTwo - 1, 0);
+						MaxSelection = FMath::Min(PreviousSelectionTwo + 1, ObstacleCollectionNumber - 1);
 
-					ObstacleCollection->HandleObstacles(bFirstIteration, NewSelection, PreviousSelectionOne);
+						if ((MaxSelection - MinSelection) > 0)
+						{
+							do
+							{
+								SelectionTwo = FMath::RandRange(MinSelection, MaxSelection);
+							} while (SelectionTwo == SelectionOne);
+						}
+						else
+						{	
+							MinSelection = FMath::Max(PreviousSelectionOne - 1, 0);
+							MaxSelection = FMath::Min(PreviousSelectionOne + 1, ObstacleCollectionNumber - 1);
 
-					PreviousSelectionOne = NewSelection;
+							if ((MaxSelection - MinSelection) > 0)
+							{
+								do
+								{
+									SelectionTwo = FMath::RandRange(MinSelection, MaxSelection);
+								} while (SelectionTwo == SelectionOne);
+							}
+							else
+							{
+								SelectionTwo = SelectionOne;
+							}
+						}
+					}
+
+					ObstacleCollection->HandleObstacles(bFirstIteration, SelectionOne, SelectionTwo);
+
+					PreviousSelectionOne = SelectionOne;
+					PreviousSelectionTwo = SelectionTwo;
 				}
 			}
 		}

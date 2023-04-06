@@ -20,7 +20,7 @@ void AObstacleArray::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
-void AObstacleArray::HandleObstacles(bool bFirstIteration, int32 SelectionOne, int32 PreviousSelectionOne)
+void AObstacleArray::HandleObstacles(bool bFirstIteration, int32 SelectionOne, int32 SelectionTwo)
 {
 	int32 ObstaclesNumber = ObstacleArray.Num();
 	if (ObstaclesNumber > 0)
@@ -31,12 +31,20 @@ void AObstacleArray::HandleObstacles(bool bFirstIteration, int32 SelectionOne, i
 			{
 				ObstacleArray[SelectionOne]->Destroy();
 			}
+			if (ObstacleArray[SelectionTwo])
+			{
+				ObstacleArray[SelectionTwo]->Destroy();
+			}
 		}
 		else // during the next iterations we must choose actors that are in a range of [-1,1] from the previous selected actors
 		{
 			if (ObstacleArray[SelectionOne])
 			{
 				ObstacleArray[SelectionOne]->Destroy();
+			}
+			if (ObstacleArray[SelectionTwo])
+			{
+				ObstacleArray[SelectionTwo]->Destroy();
 			}
 		}
 	}

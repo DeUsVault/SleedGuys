@@ -21,7 +21,9 @@ public:
 	TArray<AObstacleArray*> ObstacleActorsArray;
 
 	int32 SelectionOne = 0;
+	int32 SelectionTwo = 0;
 	int32 PreviousSelectionOne = 0;
+	int32 PreviousSelectionTwo = 0;
 	bool bFirstIteration = true;
 
 protected:
