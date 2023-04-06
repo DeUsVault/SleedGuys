@@ -24,6 +24,8 @@ public:
 	UPROPERTY(EditInstanceOnly)
 	TArray<AObstacle*> ObstacleArray;
 
-	void HandleObstacles(bool bFirstIteration, int32 SelectionOne, int32 SelectionTwo);
+	void HandleObstacles(int32 Selection);
+
+	void HandleObstaclesNew(int32 Selection);
 
 };

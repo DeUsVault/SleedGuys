@@ -20,32 +20,26 @@ void AObstacleArray::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
-void AObstacleArray::HandleObstacles(bool bFirstIteration, int32 SelectionOne, int32 SelectionTwo)
+void AObstacleArray::HandleObstacles(int32 Selection)
 {
 	int32 ObstaclesNumber = ObstacleArray.Num();
-	if (ObstaclesNumber > 0)
+	if (ObstaclesNumber > 0 && Selection < ObstaclesNumber)
 	{	
-		if (bFirstIteration) // during the first iteration we can choose whichever actor randomly
-		{	
-			if (ObstacleArray[SelectionOne])
-			{
-				ObstacleArray[SelectionOne]->Destroy();
-			}
-			if (ObstacleArray[SelectionTwo])
-			{
-				ObstacleArray[SelectionTwo]->Destroy();
-			}
-		}
-		else // during the next iterations we must choose actors that are in a range of [-1,1] from the previous selected actors
+		if (ObstacleArray[Selection])
 		{
-			if (ObstacleArray[SelectionOne])
-			{
-				ObstacleArray[SelectionOne]->Destroy();
-			}
-			if (ObstacleArray[SelectionTwo])
-			{
-				ObstacleArray[SelectionTwo]->Destroy();
-			}
+			ObstacleArray[Selection]->Destroy();
+		}
+	}
+}
+
+void AObstacleArray::HandleObstaclesNew(int32 Selection)
+{
+	int32 ObstaclesNumber = ObstacleArray.Num();
+	if (ObstaclesNumber > 0 && Selection < ObstaclesNumber)
+	{
+		if (ObstacleArray[Selection])
+		{
+			ObstacleArray[Selection]->Destroy();
 		}
 	}
 }

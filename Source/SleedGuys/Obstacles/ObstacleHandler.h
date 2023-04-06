@@ -17,17 +17,28 @@ public:
 	AObstacleHandler();
 	virtual void Tick(float DeltaTime) override;
 
-	UPROPERTY(EditInstanceOnly)
+protected:
+	virtual void BeginPlay() override;
+
+	void HandleObjects();
+
+	void HandleObjectsNew();
+
+	UPROPERTY(EditInstanceOnly, Category = "Handler Logic")
 	TArray<AObstacleArray*> ObstacleActorsArray;
 
+	UPROPERTY(EditInstanceOnly, Category = "Handler Logic")
+	bool bUseNewHandler = true;
+
+	UPROPERTY(EditInstanceOnly, Category = "Handler Logic")
+	float SafeLimitDivider = 2.f;
+
+	bool bFirstIteration = true;
+	TArray<int32> NextSafeSpots;
 	int32 SelectionOne = 0;
 	int32 SelectionTwo = 0;
 	int32 PreviousSelectionOne = 0;
 	int32 PreviousSelectionTwo = 0;
-	bool bFirstIteration = true;
-
-protected:
-	virtual void BeginPlay() override;
 
 public:	
 
