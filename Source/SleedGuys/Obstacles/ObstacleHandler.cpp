@@ -139,7 +139,6 @@ void AObstacleHandler::HandleObjectsNew()
 			if (ObstacleCollectionNumber > 0)
 			{	
 				int32 SafeLimit = FMath::CeilToInt(ObstacleCollectionNumber / SafeLimitDivider);
-				GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::FromInt(SafeLimit));
 
 				if (bFirstIteration)
 				{	

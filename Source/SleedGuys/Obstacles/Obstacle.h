@@ -20,9 +20,10 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
-private:
 	UPROPERTY(EditAnywhere)
 	UBoxComponent* OverlapBox;
+
+private:
 
 	UPROPERTY(EditAnywhere)
 	UStaticMeshComponent* ObstacleMesh;
