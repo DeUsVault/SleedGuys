@@ -42,7 +42,7 @@ private:
 	float SpellSphereRadius = 300.f;
 
 	FTimerHandle BindSpellTimer;
-	void BindSpellTimerFinished();
+	virtual void BindSpellTimerFinished();
 
 	UPROPERTY(EditAnywhere)
 	float BindSpellTime = 3.f;
