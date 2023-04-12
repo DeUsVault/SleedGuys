@@ -18,6 +18,13 @@ enum class EDeathPose : uint8
 };
 
 UENUM(BlueprintType)
+enum class ECharacterState : uint8
+{
+	ECS_Init UMETA(DisplayName = "Initial"),
+	ECS_Launch UMETA(DisplayName = "Launching")
+};
+
+UENUM(BlueprintType)
 enum class EEnemyState : uint8
 {
 	EES_Patrolling UMETA(DisplayName = "Patrolling"),

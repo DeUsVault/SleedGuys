@@ -64,6 +64,10 @@ void ASleedCharacter::BeginPlay()
 		SleedPlayerController->SetHUDStamina(Stamina, MaxStamina);
 	}
 
+	MovementComp = GetCharacterMovement();
+	GroundFriction = MovementComp->GroundFriction;
+	AirFriction = MovementComp->FallingLateralFriction;
+
 	Tags.Add(FName("SleedCharacter"));
 }
 
@@ -100,6 +104,7 @@ void ASleedCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutL
 	DOREPLIFETIME(ASleedCharacter, Health);
 	DOREPLIFETIME(ASleedCharacter, Stamina);
 	DOREPLIFETIME(ASleedCharacter, Gold);
+	DOREPLIFETIME_CONDITION(ASleedCharacter, CharacterState, COND_OwnerOnly);
 }
 
 void ASleedCharacter::PostInitializeComponents()
@@ -204,14 +209,14 @@ void ASleedCharacter::Jump()
 {	// jump is called both on server and client - reasoning not found yet!
 	if (this->JumpCurrentCount == 0)
 	{
-		GetCharacterMovement()->JumpZVelocity = firstJumpHeight;
+		MovementComp->JumpZVelocity = firstJumpHeight;
 		bShouldDoubleJump = false;
 	}
 	else if (this->JumpCurrentCount == 1)
 	{
 		if (Stamina <= 0) return;
 
-		GetCharacterMovement()->JumpZVelocity = secondJumpHeight;
+		MovementComp->JumpZVelocity = secondJumpHeight;
 		bShouldDoubleJump = true;
 
 		Stamina = FMath::Clamp(Stamina - JumpCost, 0.f, MaxStamina);
@@ -258,13 +263,13 @@ void ASleedCharacter::Sprint()
 
 	if (HasAuthority())
 	{
-		GetCharacterMovement()->MaxWalkSpeed = SprintSpeed;
+		MovementComp->MaxWalkSpeed = SprintSpeed;
 		Stamina = FMath::Clamp(Stamina - SprintCost, 0.f, MaxStamina);
 		UpdateHUDStamina();
 	}
 	else
 	{	
-		GetCharacterMovement()->MaxWalkSpeed = SprintSpeed; // we set it locally
+		MovementComp->MaxWalkSpeed = SprintSpeed; // we set it locally
 		ServerSprint(SprintSpeed, true); // we call the server to set it for everyone, we need to set it on both, else the version on client and version on server will have different values
 	}
 
@@ -273,14 +278,15 @@ void ASleedCharacter::Sprint()
 
 void ASleedCharacter::SprintTimerFinished()
 {	
-	GetCharacterMovement()->MaxWalkSpeed = OriginalSpeed; // we set it locally
+	MovementComp->MaxWalkSpeed = OriginalSpeed; // we set it locally
 	ServerSprint(OriginalSpeed, false); // we call the server to set it for everyone, we need to set it on both, else the version on client and version on server will have different values
 
 }
 
 void ASleedCharacter::ServerSprint_Implementation(float Speed, bool breduceStamina)
-{	
-	GetCharacterMovement()->MaxWalkSpeed = Speed;
+{
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, TEXT("boooooom"));
+	MovementComp->MaxWalkSpeed = Speed;
 	if (breduceStamina)
 	{
 		Stamina = FMath::Clamp(Stamina - SprintCost, 0.f, MaxStamina);
@@ -324,5 +330,32 @@ void ASleedCharacter::UpdateHUDGold()
 	if (SleedPlayerController)
 	{
 		SleedPlayerController->SetHUDGold(Gold);
+	}
+}
+
+void ASleedCharacter::ChangeAirFrictionAndLunch(FVector LaunchPower)
+{	
+	if (MovementComp == nullptr) return;
+	
+	MulticastChangeAirFriction(GroundFriction);
+	MovementComp->Launch(LaunchPower);
+}
+
+void ASleedCharacter::MulticastChangeAirFriction_Implementation(float Friction)
+{
+	MovementComp->FallingLateralFriction = Friction;
+}
+
+void ASleedCharacter::OnMovementModeChanged(EMovementMode PrevMovementMode, uint8 PreviousCustomMode)
+{
+	Super::OnMovementModeChanged(PrevMovementMode, PreviousCustomMode);
+	
+	if (PrevMovementMode == MOVE_Falling && MovementComp->MovementMode != MOVE_Falling)
+	{
+		// Reset FallingLateralFriction to its original value
+		if (MovementComp)
+		{
+			//MovementComp->FallingLateralFriction = AirFriction;
+		}
 	}
 }

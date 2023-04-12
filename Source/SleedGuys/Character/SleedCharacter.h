@@ -46,6 +46,18 @@ public:
 	//
 	void UpdateHUDStamina();
 
+	//
+	// movement mode change functions
+	//
+	void ChangeAirFrictionAndLunch(FVector LaunchPower);
+	virtual void OnMovementModeChanged(EMovementMode PrevMovementMode, uint8 PreviousCustomMode = 0) override;
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastChangeAirFriction(float Friction);
+
+	float GroundFriction = 8.f;
+	float AirFriction = 0.f;
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -67,6 +79,9 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Input")
 	UInputAction* SprintAction;
 
+	UPROPERTY(Replicated)
+	ECharacterState CharacterState = ECharacterState::ECS_Init;
+
 private:
 	// Controller
 	//
@@ -82,6 +97,11 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = Camera)
 	UCameraComponent* FollowCamera;
+
+	//
+	// character movement component
+	//
+	UCharacterMovementComponent* MovementComp;
 
 	// Jump Logic
 	//
@@ -189,5 +209,6 @@ public:
 	FORCEINLINE void SetStamina(float Amount) { Stamina = Amount; }
 	void AddGold(int32 AmountOfGold);
 	FORCEINLINE int32 GetGold() const { return Gold; }
+	FORCEINLINE ECharacterState GetCharacterState() const { return CharacterState; }
 
 };

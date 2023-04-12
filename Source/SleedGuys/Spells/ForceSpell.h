@@ -16,4 +16,7 @@ class SLEEDGUYS_API AForceSpell : public ASpell
 
 private:
 	virtual void BindSpellTimerFinished() override;
+
+	UPROPERTY(EditAnywhere, Category = "Custom Force")
+	float ForcePower = 10000.f;
 };

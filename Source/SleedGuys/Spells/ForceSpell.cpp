@@ -2,7 +2,7 @@
 
 
 #include "ForceSpell.h"
-#include "GameFramework/Character.h"
+#include "SleedGuys/Character/SleedCharacter.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
 void AForceSpell::BindSpellTimerFinished()
@@ -45,23 +45,20 @@ void AForceSpell::BindSpellTimerFinished()
         }
     }
 
-    float forceStrength = 10000.f; // Set the strength of the force
-
     // Filter the overlapping actors to include only Pawns
     TArray<APawn*> overlappingPawns;
     for (AActor* overlappingActor : overlappingActors)
     {
-        GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, TEXT("Fuck"));
-        ACharacter* overlappingCharacter = Cast<ACharacter>(overlappingActor);
+        ASleedCharacter* overlappingCharacter = Cast<ASleedCharacter>(overlappingActor);
         if (overlappingCharacter)
         {
-            GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, TEXT("bbb"));
             FVector forceDirection = overlappingCharacter->GetActorLocation() - impactPoint;
             forceDirection.Normalize();
 
-            UCharacterMovementComponent* MovementComponent = overlappingCharacter->GetCharacterMovement();
-            
-            MovementComponent->Launch(forceDirection * forceStrength);
+            FVector LaunchPower = FVector(forceDirection.X * ForcePower, forceDirection.Y * ForcePower, 0.f);
+
+            overlappingCharacter->ChangeAirFrictionAndLunch(LaunchPower);
         }
+
     }
 }
