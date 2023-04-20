@@ -65,8 +65,11 @@ void ASleedCharacter::BeginPlay()
 	}
 
 	MovementComp = GetCharacterMovement();
-	GroundFriction = MovementComp->GroundFriction;
-	AirFriction = MovementComp->FallingLateralFriction;
+	if (MovementComp)
+	{
+		GroundFriction = MovementComp->GroundFriction;
+		AirFriction = MovementComp->FallingLateralFriction;
+	}
 
 	Tags.Add(FName("SleedCharacter"));
 }
@@ -229,6 +232,12 @@ void ASleedCharacter::Jump()
 void ASleedCharacter::Landed(const FHitResult& Hit)
 {
 	bShouldDoubleJump = false;
+
+	if (MovementComp && MovementComp->FallingLateralFriction != AirFriction)
+	{
+		MulticastChangeAirFriction(AirFriction);
+	}
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Landed Trigger"));
 }
 
 void ASleedCharacter::EquipButtonPressed()
@@ -352,10 +361,11 @@ void ASleedCharacter::OnMovementModeChanged(EMovementMode PrevMovementMode, uint
 	
 	if (PrevMovementMode == MOVE_Falling && MovementComp->MovementMode != MOVE_Falling)
 	{
-		// Reset FallingLateralFriction to its original value
+		// Reset FallingLateralFriction to its original value (AirFriction)
 		if (MovementComp)
 		{
-			//MovementComp->FallingLateralFriction = AirFriction;
+			//MulticastChangeAirFriction(AirFriction);
+			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, TEXT("im down OnMovementModeChanged"));
 		}
 	}
 }
