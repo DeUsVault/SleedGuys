@@ -3,6 +3,7 @@
 
 #include "Turret.h"
 #include "Components/BoxComponent.h"
+#include "SleedGuys/Projectiles/Projectile.h"
 
 ATurret::ATurret()
 {
@@ -23,10 +24,24 @@ ATurret::ATurret()
 void ATurret::BeginPlay()
 {
 	Super::BeginPlay();	
+
+	Fire(FVector::ZeroVector);
 }
 
 void ATurret::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+}
+
+void ATurret::Fire(const FVector& HitTarget)
+{	
+	if (ProjectileClass)
+	{
+		FVector Location = ProjectileSpawnPoint->GetComponentLocation();
+		FRotator Rotation = ProjectileSpawnPoint->GetComponentRotation();
+
+		AProjectile* Projectile = GetWorld()->SpawnActor<AProjectile>(ProjectileClass, Location, Rotation);
+		Projectile->SetOwner(this);
+	}
 }
 

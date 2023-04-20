@@ -7,6 +7,7 @@
 #include "Turret.generated.h"
 
 class UBoxComponent;
+class AProjectile;
 
 UCLASS()
 class SLEEDGUYS_API ATurret : public AActor
@@ -17,8 +18,13 @@ public:
 	ATurret();
 	virtual void Tick(float DeltaTime) override;
 
+	void Fire(const FVector& HitTarget);
+
 protected:
 	virtual void BeginPlay() override;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<AProjectile> ProjectileClass;
 
 private:	
 	UPROPERTY(VisibleAnywhere, Category = "Components")
