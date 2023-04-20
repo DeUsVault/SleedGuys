@@ -4,6 +4,7 @@
 #include "Turret.h"
 #include "Components/BoxComponent.h"
 #include "SleedGuys/Projectiles/Projectile.h"
+#include "Engine/StaticMeshActor.h"
 
 ATurret::ATurret()
 {
@@ -25,7 +26,9 @@ void ATurret::BeginPlay()
 {
 	Super::BeginPlay();	
 
-	Fire(FVector::ZeroVector);
+	ProjectileSpawnPointLocation = ProjectileSpawnPoint->GetComponentLocation();
+
+	GetWorldTimerManager().SetTimer(FireRateTimerHandle, this, &ATurret::Fire, FireRate, true);
 }
 
 void ATurret::Tick(float DeltaTime)
@@ -33,15 +36,27 @@ void ATurret::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
-void ATurret::Fire(const FVector& HitTarget)
+void ATurret::Fire()
 {	
 	if (ProjectileClass)
-	{
-		FVector Location = ProjectileSpawnPoint->GetComponentLocation();
-		FRotator Rotation = ProjectileSpawnPoint->GetComponentRotation();
+	{	
+		int32 TargetsNum = PossibleTargets.Num();
 
-		AProjectile* Projectile = GetWorld()->SpawnActor<AProjectile>(ProjectileClass, Location, Rotation);
-		Projectile->SetOwner(this);
+		if (TargetsNum > 0)
+		{
+			int32 Selection = FMath::RandRange(0, TargetsNum - 1);
+			AStaticMeshActor* Mesh = PossibleTargets[Selection];
+			if (Mesh)
+			{	
+				// calculate the rotation our projectile should have, by taking into account the target's location/rotation
+				FVector HitTarget = Mesh->GetActorLocation();
+				FVector ToTarget = HitTarget - ProjectileSpawnPointLocation;
+				FRotator TargetRotation = ToTarget.Rotation();
+
+				AProjectile* Projectile = GetWorld()->SpawnActor<AProjectile>(ProjectileClass, ProjectileSpawnPointLocation, TargetRotation);
+				Projectile->SetOwner(this);
+			}
+		}
 	}
 }
 

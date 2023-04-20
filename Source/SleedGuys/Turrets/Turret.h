@@ -8,6 +8,7 @@
 
 class UBoxComponent;
 class AProjectile;
+class AStaticMeshActor;
 
 UCLASS()
 class SLEEDGUYS_API ATurret : public AActor
@@ -18,13 +19,16 @@ public:
 	ATurret();
 	virtual void Tick(float DeltaTime) override;
 
-	void Fire(const FVector& HitTarget);
+	void Fire();
 
 protected:
 	virtual void BeginPlay() override;
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<AProjectile> ProjectileClass;
+
+	UPROPERTY(EditInstanceOnly)
+	TArray<AStaticMeshActor*> PossibleTargets;
 
 private:	
 	UPROPERTY(VisibleAnywhere, Category = "Components")
@@ -35,5 +39,12 @@ private:
 
 	UPROPERTY(VisibleAnywhere, Category = "Components")
 	USceneComponent* ProjectileSpawnPoint;
+
+	FTimerHandle FireRateTimerHandle;
+
+	UPROPERTY(EditAnywhere, Category = "Fire Events")
+	float FireRate = 2.f;
+
+	FVector ProjectileSpawnPointLocation;
 
 };

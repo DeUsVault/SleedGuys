@@ -3,7 +3,6 @@
 
 #include "ForceSpell.h"
 #include "SleedGuys/Character/SleedCharacter.h"
-#include "GameFramework/CharacterMovementComponent.h"
 
 void AForceSpell::BindSpellTimerFinished()
 {
