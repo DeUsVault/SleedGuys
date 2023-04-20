@@ -364,7 +364,6 @@ void ASleedCharacter::OnMovementModeChanged(EMovementMode PrevMovementMode, uint
 		// Reset FallingLateralFriction to its original value (AirFriction)
 		if (MovementComp)
 		{
-			//MulticastChangeAirFriction(AirFriction);
 			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, TEXT("im down OnMovementModeChanged"));
 		}
 	}
