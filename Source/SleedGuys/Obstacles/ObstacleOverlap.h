@@ -15,6 +15,7 @@ class SLEEDGUYS_API AObstacleOverlap : public AObstacle
 	GENERATED_BODY()
 
 public:
+	// bind overlap is called on the actor from another actor, for example from the ObstacleArray
 	void BindOverlap();
 
 protected:
