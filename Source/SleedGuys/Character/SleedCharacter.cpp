@@ -78,6 +78,13 @@ void ASleedCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if (MovementComp)
+	{
+		FHitResult OutHit;
+		MovementComp->SafeMoveUpdatedComponent(FVector(0.f, 0.f, 0.01f), GetActorRotation(), true, OutHit);
+		MovementComp->SafeMoveUpdatedComponent(FVector(0.f, 0.f, -0.01f), GetActorRotation(), true, OutHit);
+	}
+
 	/* way to check timerhandle
 		if (GEngine)
 			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("World delta for current frame equals %f"), GetWorldTimerManager().GetTimerElapsed(SprintTimer)));
