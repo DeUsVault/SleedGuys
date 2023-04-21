@@ -7,57 +7,30 @@
 void AForceSpell::BindSpellTimerFinished()
 {
 	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, TEXT("Forceeee"));
-    FVector impactPoint = GetActorLocation();
-    float radius = 500.0f; // Set the radius of the search
 
-    // Create a sphere with the specified radius and location
-    FCollisionShape collisionShape = FCollisionShape::MakeSphere(radius);
-
-    // Set up the query parameters to include only Pawns
-    FCollisionQueryParams queryParams;
-    queryParams.AddIgnoredActor(this);
-    queryParams.bTraceComplex = true;
-    queryParams.bReturnPhysicalMaterial = false;
-    queryParams.AddIgnoredActor(GetOwner());
-    queryParams.bReturnFaceIndex = false;
-    queryParams.bIgnoreBlocks = false;
-    queryParams.bIgnoreTouches = false;
-
-    // Use the collision shape and query parameters to get all overlapping actors
-    TArray<FOverlapResult> overlappingResults;
-    GetWorld()->OverlapMultiByObjectType(
-        overlappingResults,
-        impactPoint,
-        FQuat::Identity,
-        FCollisionObjectQueryParams(ECC_Pawn),
-        collisionShape,
-        queryParams
-    );
-
-    TArray<AActor*> overlappingActors;
-    for (const FOverlapResult& overlap : overlappingResults)
+    TArray<AActor*> Result;
+    GetOverlappingActors(Result);
+    if (Result.Num() > 0)
     {
-        AActor* overlappingActor = overlap.GetActor();
-        if (overlappingActor && overlappingActor->IsA<APawn>())
+        for (auto Actor : Result)
         {
-            overlappingActors.Add(overlappingActor);
+            if (Actor && Actor->ActorHasTag(FName("SleedCharacter")))
+            {
+                ASleedCharacter* overlappingCharacter = Cast<ASleedCharacter>(Actor);
+                if (overlappingCharacter)
+                {
+                    FVector impactPoint = GetActorLocation();
+
+                    FVector forceDirection = overlappingCharacter->GetActorLocation() - impactPoint;
+                    forceDirection.Normalize();
+
+                    FVector LaunchPower = FVector(forceDirection.X * ForcePower, forceDirection.Y * ForcePower, 0.f);
+
+                    overlappingCharacter->ChangeAirFrictionAndLunch(LaunchPower);
+                }
+            }
         }
     }
 
-    // Filter the overlapping actors to include only Pawns
-    TArray<APawn*> overlappingPawns;
-    for (AActor* overlappingActor : overlappingActors)
-    {
-        ASleedCharacter* overlappingCharacter = Cast<ASleedCharacter>(overlappingActor);
-        if (overlappingCharacter)
-        {
-            FVector forceDirection = overlappingCharacter->GetActorLocation() - impactPoint;
-            forceDirection.Normalize();
-
-            FVector LaunchPower = FVector(forceDirection.X * ForcePower, forceDirection.Y * ForcePower, 0.f);
-
-            overlappingCharacter->ChangeAirFrictionAndLunch(LaunchPower);
-        }
-
-    }
+    Destroy();
 }

@@ -34,26 +34,20 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
+	UPROPERTY(EditAnywhere, Category = "Combat")
+	USphereComponent* OverlapSphere;
+
 private:	
 	UPROPERTY(EditDefaultsOnly, Category = "Combat")
 	UStaticMeshComponent* ProjectileMesh;
 
-	UPROPERTY(EditAnywhere, Category = "Combat")
-	USphereComponent* OverlapSphere;
-
 	UPROPERTY(VisibleAnywhere)
 	UProjectileMovementComponent* ProjectileMovementComponent;
-
-	UPROPERTY(EditAnywhere, Category = "Combat")
-	float ForcePower = 10000.f;
 
 	UPROPERTY(EditAnywhere, Category = "Combat")
 	float InitMoveSpeed = 2500.f;
 
 	UPROPERTY(EditAnywhere, Category = "Combat")
 	float MaxMoveSpeed = 2500.f;
-
-	UPROPERTY(EditAnywhere, Category = "Combat")
-	float MinVelocityTrigger = 500.f;
 
 };
