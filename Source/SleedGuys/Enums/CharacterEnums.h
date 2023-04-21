@@ -18,10 +18,11 @@ enum class EDeathPose : uint8
 };
 
 UENUM(BlueprintType)
-enum class ECharacterState : uint8
+enum class ECharacterStunState : uint8
 {
 	ECS_Init UMETA(DisplayName = "Initial"),
-	ECS_Launch UMETA(DisplayName = "Launching")
+	ECS_Xstun UMETA(DisplayName = "X stunned"),
+	ECS_Zstun UMETA(DisplayName = "Z stunned")
 };
 
 UENUM(BlueprintType)

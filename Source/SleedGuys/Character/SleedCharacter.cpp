@@ -102,6 +102,8 @@ void ASleedCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ASleedCharacter::Jump);
 		EnhancedInputComponent->BindAction(EquipAction, ETriggerEvent::Triggered, this, &ASleedCharacter::EquipButtonPressed);
 		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Triggered, this, &ASleedCharacter::Sprint);
+
+		EnhancedInputComponent->BindAction(XButtonAction, ETriggerEvent::Triggered, this, &ASleedCharacter::XButtonPressed);
 	}
 }
 
@@ -114,7 +116,8 @@ void ASleedCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutL
 	DOREPLIFETIME(ASleedCharacter, Health);
 	DOREPLIFETIME(ASleedCharacter, Stamina);
 	DOREPLIFETIME(ASleedCharacter, Gold);
-	DOREPLIFETIME_CONDITION(ASleedCharacter, CharacterState, COND_OwnerOnly);
+	DOREPLIFETIME(ASleedCharacter, CharacterStunState);
+	DOREPLIFETIME_CONDITION(ASleedCharacter, ButtonPresses, COND_OwnerOnly);
 }
 
 void ASleedCharacter::PostInitializeComponents()
@@ -373,5 +376,59 @@ void ASleedCharacter::OnMovementModeChanged(EMovementMode PrevMovementMode, uint
 		{
 			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, TEXT("im down OnMovementModeChanged"));
 		}
+	}
+}
+
+void ASleedCharacter::XButtonPressed()
+{	
+	if (CharacterStunState != ECharacterStunState::ECS_Xstun) return;
+
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, TEXT("x presssed"));
+	if (HasAuthority())
+	{
+		ButtonPresses++;
+		UpdateStunButtonHUD(ButtonPresses);
+		HandleButtonPress();
+	}
+	else
+	{	
+		ServerButtonPressed();
+	}
+}
+
+void ASleedCharacter::ServerButtonPressed_Implementation()
+{	
+	ButtonPresses++; // it replicates to the owning client
+	HandleButtonPress();
+}
+
+void ASleedCharacter::OnRep_ButtonPressed()
+{
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, TEXT("replicating ButtonPresses on client side"));
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::FromInt(ButtonPresses));
+	UpdateStunButtonHUD(ButtonPresses);
+}
+
+void ASleedCharacter::HandleButtonPress()
+{
+	if (ButtonPresses >= 3)
+	{	
+		ClientResetStateAndButton(ButtonPresses); // if we are on the server, we should call this so that client side can update the HUD before we reset ButtonPresses
+		CharacterStunState = ECharacterStunState::ECS_Init;
+		ButtonPresses = 0;
+	}
+}
+
+void ASleedCharacter::ClientResetStateAndButton_Implementation(int32 num)
+{
+	UpdateStunButtonHUD(num);
+}
+
+void ASleedCharacter::UpdateStunButtonHUD(int32 num)
+{
+	SleedPlayerController = SleedPlayerController == nullptr ? Cast<ASleedPlayerController>(Controller) : SleedPlayerController;
+	if (SleedPlayerController)
+	{
+		SleedPlayerController->SetHUDStunButtons(num);
 	}
 }

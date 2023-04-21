@@ -20,6 +20,7 @@ public:
 	void SetHUDHealth(float Health, float MaxHealth);
 	void SetHUDStamina(float Stamina, float MaxStamina);
 	void SetHUDGold(int32 CoinsNum);
+	void SetHUDStunButtons(int32 num);
 protected:
 	virtual void BeginPlay() override;
 

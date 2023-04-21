@@ -4,8 +4,10 @@
 #include "SleedPlayerController.h"
 #include "SleedGuys/HUD/SleedHUD.h"
 #include "SleedGuys/HUD/CharacterOverlay.h"
+#include "SleedGuys/HUD/ButtonPresser.h"
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
+#include "Components/Button.h"
 
 void ASleedPlayerController::BeginPlay()
 {
@@ -58,6 +60,34 @@ void ASleedPlayerController::SetHUDGold(int32 CoinsNum)
 	{
 		FString CoinText = FString::FromInt(CoinsNum);
 		SleedHUD->CharacterOverlay->CoinText->SetText(FText::FromString(CoinText));
+	}
+}
+
+void ASleedPlayerController::SetHUDStunButtons(int32 num)
+{
+	SleedHUD = SleedHUD == nullptr ? Cast<ASleedHUD>(GetHUD()) : SleedHUD;
+
+	bool bHUDValid = SleedHUD &&
+		SleedHUD->ButtonPresser &&
+		SleedHUD->ButtonPresser->FirstButton &&
+		SleedHUD->ButtonPresser->SecondButton &&
+		SleedHUD->ButtonPresser->ThirdButton;
+
+	if (bHUDValid)
+	{
+		switch (num) {
+		case 1:
+			SleedHUD->ButtonPresser->FirstButton->SetBackgroundColor(FLinearColor::Green);
+			break;
+		case 2:
+			SleedHUD->ButtonPresser->SecondButton->SetBackgroundColor(FLinearColor::Green);
+			break;
+		case 3:
+			SleedHUD->ButtonPresser->ThirdButton->SetBackgroundColor(FLinearColor::Green);
+			break;
+		default:
+			break;
+		}
 	}
 }
 

@@ -40,6 +40,7 @@ public:
 	virtual void Jump() override;
 	void EquipButtonPressed();
 	void Sprint();
+	void XButtonPressed();
 
 	// Stamina Functions
 	//
@@ -79,8 +80,27 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Input")
 	UInputAction* SprintAction;
 
-	UPROPERTY(Replicated)
-	ECharacterState CharacterState = ECharacterState::ECS_Init;
+	UPROPERTY(EditAnywhere, Category = "Input")
+	UInputAction* XButtonAction;
+
+	UPROPERTY(Replicated, VisibleAnywhere)
+	ECharacterStunState CharacterStunState = ECharacterStunState::ECS_Xstun;
+
+	UFUNCTION(Server, Reliable)
+	void ServerButtonPressed();
+
+	UPROPERTY(Replicated, ReplicatedUsing = OnRep_ButtonPressed)
+	int32 ButtonPresses = 0;
+
+	UFUNCTION(Client, Reliable)
+	void ClientResetStateAndButton(int32 num);
+
+	UFUNCTION()
+	void OnRep_ButtonPressed();
+
+	void HandleButtonPress();
+
+	void UpdateStunButtonHUD(int32 num);
 
 private:
 	// Controller
@@ -209,6 +229,6 @@ public:
 	FORCEINLINE void SetStamina(float Amount) { Stamina = Amount; }
 	void AddGold(int32 AmountOfGold);
 	FORCEINLINE int32 GetGold() const { return Gold; }
-	FORCEINLINE ECharacterState GetCharacterState() const { return CharacterState; }
+	FORCEINLINE ECharacterStunState GetCharacterStunState() const { return CharacterStunState; }
 
 };

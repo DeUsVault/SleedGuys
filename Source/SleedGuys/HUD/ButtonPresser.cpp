@@ -7,6 +7,4 @@
 void UButtonPresser::NativeConstruct()
 {	
 	Super::NativeConstruct();
-
-	FirstButton->SetBackgroundColor(FLinearColor::Green);
 }
