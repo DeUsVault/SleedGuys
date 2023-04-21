@@ -4,6 +4,7 @@
 #include "SleedHUD.h"
 #include "GameFramework/PlayerController.h"
 #include "CharacterOverlay.h"
+#include "ButtonPresser.h"
 
 void ASleedHUD::BeginPlay()
 {
@@ -19,6 +20,12 @@ void ASleedHUD::AddCharacterOverlay()
 	{
 		CharacterOverlay = CreateWidget<UCharacterOverlay>(PlayerController, CharacterOverlayClass);
 		CharacterOverlay->AddToViewport();
+	}
+
+	if (PlayerController && ButtonPresserClass)
+	{
+		ButtonPresser = CreateWidget<UButtonPresser>(PlayerController, ButtonPresserClass);
+		ButtonPresser->AddToViewport();
 	}
 }
 

@@ -8,6 +8,7 @@
 
 class UUserWidget;
 class UCharacterOverlay;
+class UButtonPresser;
 
 /**
  * 
@@ -22,6 +23,14 @@ public:
 	TSubclassOf<UUserWidget> CharacterOverlayClass;
 
 	UCharacterOverlay* CharacterOverlay;
+
+	//
+	// custom widget for when character is stunned - press button 'X' times to unstun
+	//
+	UPROPERTY(EditAnywhere, Category = "Custom Widgets")
+	TSubclassOf<UButtonPresser> ButtonPresserClass;
+
+	UButtonPresser* ButtonPresser;
 protected:
 	virtual void BeginPlay() override;
 	void AddCharacterOverlay();
