@@ -83,17 +83,22 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Input")
 	UInputAction* XButtonAction;
 
-	UPROPERTY(Replicated, VisibleAnywhere)
+	UPROPERTY(Replicated, ReplicatedUsing = OnRep_CharStunState, VisibleAnywhere)
 	ECharacterStunState CharacterStunState = ECharacterStunState::ECS_Xstun;
+
+	UFUNCTION()
+	void OnRep_CharStunState();
+
+	void StunWidgetVisibility();
 
 	UFUNCTION(Server, Reliable)
 	void ServerButtonPressed();
 
-	UPROPERTY(Replicated, ReplicatedUsing = OnRep_ButtonPressed)
-	int32 ButtonPresses = 0;
-
 	UFUNCTION(Client, Reliable)
 	void ClientResetStateAndButton(int32 num);
+
+	UPROPERTY(Replicated, ReplicatedUsing = OnRep_ButtonPressed, VisibleAnywhere)
+	int32 ButtonPresses = 0;
 
 	UFUNCTION()
 	void OnRep_ButtonPressed();
@@ -101,6 +106,8 @@ protected:
 	void HandleButtonPress();
 
 	void UpdateStunButtonHUD(int32 num);
+
+	void ChangeStunState(ECharacterStunState StunState);
 
 private:
 	// Controller

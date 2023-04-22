@@ -117,7 +117,7 @@ void ASleedCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutL
 	DOREPLIFETIME(ASleedCharacter, Stamina);
 	DOREPLIFETIME(ASleedCharacter, Gold);
 	DOREPLIFETIME(ASleedCharacter, CharacterStunState);
-	DOREPLIFETIME_CONDITION(ASleedCharacter, ButtonPresses, COND_OwnerOnly);
+	DOREPLIFETIME(ASleedCharacter, ButtonPresses);
 }
 
 void ASleedCharacter::PostInitializeComponents()
@@ -383,7 +383,6 @@ void ASleedCharacter::XButtonPressed()
 {	
 	if (CharacterStunState != ECharacterStunState::ECS_Xstun) return;
 
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, TEXT("x presssed"));
 	if (HasAuthority())
 	{
 		ButtonPresses++;
@@ -402,10 +401,13 @@ void ASleedCharacter::ServerButtonPressed_Implementation()
 	HandleButtonPress();
 }
 
+void ASleedCharacter::OnRep_CharStunState()
+{
+	StunWidgetVisibility();
+}
+
 void ASleedCharacter::OnRep_ButtonPressed()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, TEXT("replicating ButtonPresses on client side"));
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::FromInt(ButtonPresses));
 	UpdateStunButtonHUD(ButtonPresses);
 }
 
@@ -414,7 +416,7 @@ void ASleedCharacter::HandleButtonPress()
 	if (ButtonPresses >= 3)
 	{	
 		ClientResetStateAndButton(ButtonPresses); // if we are on the server, we should call this so that client side can update the HUD before we reset ButtonPresses
-		CharacterStunState = ECharacterStunState::ECS_Init;
+		ChangeStunState(ECharacterStunState::ECS_Init);
 		ButtonPresses = 0;
 	}
 }
@@ -430,5 +432,31 @@ void ASleedCharacter::UpdateStunButtonHUD(int32 num)
 	if (SleedPlayerController)
 	{
 		SleedPlayerController->SetHUDStunButtons(num);
+	}
+}
+
+void ASleedCharacter::ChangeStunState(ECharacterStunState StunState)
+{
+	CharacterStunState = StunState;
+
+	StunWidgetVisibility();
+}
+
+void ASleedCharacter::StunWidgetVisibility()
+{
+	SleedPlayerController = SleedPlayerController == nullptr ? Cast<ASleedPlayerController>(Controller) : SleedPlayerController;
+	if (SleedPlayerController == nullptr) return;
+
+	if (CharacterStunState == ECharacterStunState::ECS_Init)
+	{
+		SleedPlayerController->HandleStunWidget(false); // destroy stun widget
+	}
+	else if (CharacterStunState == ECharacterStunState::ECS_Xstun)
+	{
+		SleedPlayerController->HandleStunWidget(true); // add widget to screen
+	}
+	else if (CharacterStunState == ECharacterStunState::ECS_Zstun)
+	{
+		SleedPlayerController->HandleStunWidget(true); // add widget to screen
 	}
 }

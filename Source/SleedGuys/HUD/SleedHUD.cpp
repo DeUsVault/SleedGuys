@@ -22,10 +22,27 @@ void ASleedHUD::AddCharacterOverlay()
 		CharacterOverlay->AddToViewport();
 	}
 
+	ButtonPresser = CreateWidget<UButtonPresser>(PlayerController, ButtonPresserClass);
+	ButtonPresser->AddToViewport();
+}
+
+void ASleedHUD::HandleStunWidgetHUD(bool bCreate)
+{	
+	APlayerController* PlayerController = GetOwningPlayerController();
 	if (PlayerController && ButtonPresserClass)
-	{
-		ButtonPresser = CreateWidget<UButtonPresser>(PlayerController, ButtonPresserClass);
-		ButtonPresser->AddToViewport();
+	{	
+		if (bCreate)
+		{
+			ButtonPresser = CreateWidget<UButtonPresser>(PlayerController, ButtonPresserClass);
+			ButtonPresser->AddToViewport();
+		}
+		else
+		{	
+			if (ButtonPresser)
+			{
+				ButtonPresser->RemoveFromViewport();
+			}
+		}
 	}
 }
 

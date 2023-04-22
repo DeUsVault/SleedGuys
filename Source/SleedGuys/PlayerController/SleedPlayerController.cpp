@@ -63,6 +63,16 @@ void ASleedPlayerController::SetHUDGold(int32 CoinsNum)
 	}
 }
 
+void ASleedPlayerController::HandleStunWidget(bool bCreate)
+{
+	SleedHUD = SleedHUD == nullptr ? Cast<ASleedHUD>(GetHUD()) : SleedHUD;
+
+	if (SleedHUD)
+	{
+		SleedHUD->HandleStunWidgetHUD(bCreate);
+	}
+}
+
 void ASleedPlayerController::SetHUDStunButtons(int32 num)
 {
 	SleedHUD = SleedHUD == nullptr ? Cast<ASleedHUD>(GetHUD()) : SleedHUD;

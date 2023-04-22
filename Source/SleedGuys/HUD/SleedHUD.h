@@ -31,6 +31,8 @@ public:
 	TSubclassOf<UButtonPresser> ButtonPresserClass;
 
 	UButtonPresser* ButtonPresser;
+
+	void HandleStunWidgetHUD(bool bCreate);
 protected:
 	virtual void BeginPlay() override;
 	void AddCharacterOverlay();
