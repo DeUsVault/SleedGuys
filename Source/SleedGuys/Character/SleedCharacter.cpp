@@ -117,7 +117,6 @@ void ASleedCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutL
 	DOREPLIFETIME(ASleedCharacter, Stamina);
 	DOREPLIFETIME(ASleedCharacter, Gold);
 	DOREPLIFETIME(ASleedCharacter, CharacterStunState);
-	DOREPLIFETIME(ASleedCharacter, ButtonPresses);
 }
 
 void ASleedCharacter::PostInitializeComponents()
@@ -385,45 +384,54 @@ void ASleedCharacter::XButtonPressed()
 
 	if (HasAuthority())
 	{
+		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, TEXT("authority"));
 		ButtonPresses++;
 		UpdateStunButtonHUD(ButtonPresses);
 		HandleButtonPress();
 	}
 	else
 	{	
+		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, TEXT("client"));
+		ButtonPresses++; // we set it locally
+		UpdateStunButtonHUD(ButtonPresses);
 		ServerButtonPressed();
 	}
 }
 
 void ASleedCharacter::ServerButtonPressed_Implementation()
 {	
-	ButtonPresses++; // it replicates to the owning client
+	ButtonPresses++;
 	HandleButtonPress();
 }
 
 void ASleedCharacter::OnRep_CharStunState()
-{
-	StunWidgetVisibility();
+{	
+	if (HasAuthority())
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("authority rep charstate"));
+	}
+	else
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("client rep charstate"));
+	}
+	ButtonPresses = 0;
+	StunWidgetVisibility(CharacterStunState);
 }
 
-void ASleedCharacter::OnRep_ButtonPressed()
-{
-	UpdateStunButtonHUD(ButtonPresses);
+void ASleedCharacter::ClientStunStateChanged_Implementation(ECharacterStunState StunState)
+{	
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Green, TEXT("manual client RPC"));
+	CharacterStunState = StunState;
+	ButtonPresses = 0;
+	StunWidgetVisibility(CharacterStunState);
 }
 
 void ASleedCharacter::HandleButtonPress()
-{
+{	
 	if (ButtonPresses >= 3)
 	{	
-		ClientResetStateAndButton(ButtonPresses); // if we are on the server, we should call this so that client side can update the HUD before we reset ButtonPresses
-		ChangeStunState(ECharacterStunState::ECS_Init);
-		ButtonPresses = 0;
+		ServerChangeStunState(ECharacterStunState::ECS_Init);
 	}
-}
-
-void ASleedCharacter::ClientResetStateAndButton_Implementation(int32 num)
-{
-	UpdateStunButtonHUD(num);
 }
 
 void ASleedCharacter::UpdateStunButtonHUD(int32 num)
@@ -436,17 +444,32 @@ void ASleedCharacter::UpdateStunButtonHUD(int32 num)
 }
 
 void ASleedCharacter::ChangeStunState(ECharacterStunState StunState)
-{
-	CharacterStunState = StunState;
-
-	StunWidgetVisibility();
+{	
+	ServerChangeStunState(StunState);
 }
 
-void ASleedCharacter::StunWidgetVisibility()
+void ASleedCharacter::ServerChangeStunState_Implementation(ECharacterStunState StunState)
+{	
+	if (CharacterStunState != StunState)
+	{
+		CharacterStunState = StunState;
+		ButtonPresses = 0;
+		StunWidgetVisibility(CharacterStunState);
+	}
+	else // if the previous and current value are the same, the CharacterStunState wont be replicated so we need to send the data to the client manually
+	{
+		CharacterStunState = StunState;
+		ButtonPresses = 0;
+		ClientStunStateChanged(StunState);
+		StunWidgetVisibility(CharacterStunState);
+	}
+}
+
+void ASleedCharacter::StunWidgetVisibility(ECharacterStunState StunState)
 {
 	SleedPlayerController = SleedPlayerController == nullptr ? Cast<ASleedPlayerController>(Controller) : SleedPlayerController;
 	if (SleedPlayerController == nullptr) return;
-
+	
 	if (CharacterStunState == ECharacterStunState::ECS_Init)
 	{
 		SleedPlayerController->HandleStunWidget(false); // destroy stun widget

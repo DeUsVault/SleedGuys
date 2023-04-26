@@ -59,6 +59,14 @@ public:
 	float GroundFriction = 8.f;
 	float AirFriction = 0.f;
 
+	//
+	// stun mechanic functions
+	//
+	void ChangeStunState(ECharacterStunState StunState);
+
+	UFUNCTION(Server, Reliable)
+	void ServerChangeStunState(ECharacterStunState StunState);
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -83,31 +91,26 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Input")
 	UInputAction* XButtonAction;
 
-	UPROPERTY(Replicated, ReplicatedUsing = OnRep_CharStunState, VisibleAnywhere)
-	ECharacterStunState CharacterStunState = ECharacterStunState::ECS_Xstun;
+	UPROPERTY(Replicated, ReplicatedUsing = OnRep_CharStunState, VisibleAnywhere, Category = "Stun")
+	ECharacterStunState CharacterStunState = ECharacterStunState::ECS_Init;
 
 	UFUNCTION()
 	void OnRep_CharStunState();
 
-	void StunWidgetVisibility();
+	UFUNCTION(Client, Reliable)
+	void ClientStunStateChanged(ECharacterStunState StunState);
+
+	void StunWidgetVisibility(ECharacterStunState StunState = ECharacterStunState::ECS_Default);
 
 	UFUNCTION(Server, Reliable)
 	void ServerButtonPressed();
 
-	UFUNCTION(Client, Reliable)
-	void ClientResetStateAndButton(int32 num);
-
-	UPROPERTY(Replicated, ReplicatedUsing = OnRep_ButtonPressed, VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, Category = "Stun")
 	int32 ButtonPresses = 0;
-
-	UFUNCTION()
-	void OnRep_ButtonPressed();
 
 	void HandleButtonPress();
 
 	void UpdateStunButtonHUD(int32 num);
-
-	void ChangeStunState(ECharacterStunState StunState);
 
 private:
 	// Controller

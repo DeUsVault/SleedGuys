@@ -21,9 +21,6 @@ void ASleedHUD::AddCharacterOverlay()
 		CharacterOverlay = CreateWidget<UCharacterOverlay>(PlayerController, CharacterOverlayClass);
 		CharacterOverlay->AddToViewport();
 	}
-
-	ButtonPresser = CreateWidget<UButtonPresser>(PlayerController, ButtonPresserClass);
-	ButtonPresser->AddToViewport();
 }
 
 void ASleedHUD::HandleStunWidgetHUD(bool bCreate)
@@ -32,7 +29,11 @@ void ASleedHUD::HandleStunWidgetHUD(bool bCreate)
 	if (PlayerController && ButtonPresserClass)
 	{	
 		if (bCreate)
-		{
+		{	
+			if (ButtonPresser)
+			{
+				ButtonPresser->RemoveFromViewport();
+			} // we need to remove the previous widget if it existed
 			ButtonPresser = CreateWidget<UButtonPresser>(PlayerController, ButtonPresserClass);
 			ButtonPresser->AddToViewport();
 		}

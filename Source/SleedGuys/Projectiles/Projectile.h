@@ -50,4 +50,8 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Combat")
 	float MaxMoveSpeed = 2500.f;
 
+	FTimerHandle BindOverlapTimer;
+	float BindOverlapTime = 0.1f;
+	virtual void BindOverlapTimerFinished();
+
 };

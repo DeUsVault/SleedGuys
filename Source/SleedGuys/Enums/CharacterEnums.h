@@ -22,7 +22,9 @@ enum class ECharacterStunState : uint8
 {
 	ECS_Init UMETA(DisplayName = "Initial"),
 	ECS_Xstun UMETA(DisplayName = "X stunned"),
-	ECS_Zstun UMETA(DisplayName = "Z stunned")
+	ECS_Zstun UMETA(DisplayName = "Z stunned"),
+
+	ECS_Default UMETA(DisplayName = "Default")
 };
 
 UENUM(BlueprintType)

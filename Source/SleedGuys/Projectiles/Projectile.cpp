@@ -15,7 +15,7 @@ AProjectile::AProjectile()
 
 	OverlapSphere = CreateDefaultSubobject<USphereComponent>(TEXT("OverlapSphere"));
 	OverlapSphere->SetupAttachment(RootComponent);
-	OverlapSphere->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	OverlapSphere->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	OverlapSphere->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 	OverlapSphere->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
 
@@ -25,17 +25,29 @@ AProjectile::AProjectile()
 	ProjectileMovementComponent->MaxSpeed = MaxMoveSpeed;
 }
 
+void AProjectile::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+}
+
 void AProjectile::BeginPlay()
 {
 	Super::BeginPlay();
 
-	OverlapSphere->OnComponentBeginOverlap.AddDynamic(this, &AProjectile::OnSphereOverlap);
-	//ProjectileMesh->OnComponentHit.AddDynamic(this, &AProjectile::OnHit);
+	if (HasAuthority())
+	{	
+		GetWorldTimerManager().SetTimer(
+			BindOverlapTimer,
+			this,
+			&AProjectile::BindOverlapTimerFinished,
+			BindOverlapTime
+		);
+	}
 }
 
-void AProjectile::Tick(float DeltaTime)
+void AProjectile::BindOverlapTimerFinished()
 {
-	Super::Tick(DeltaTime);
+	OverlapSphere->OnComponentBeginOverlap.AddDynamic(this, &AProjectile::OnSphereOverlap);
 }
 
 void AProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
