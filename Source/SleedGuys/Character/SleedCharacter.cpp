@@ -186,6 +186,8 @@ bool ASleedCharacter::IsWeaponEquipped()
 
 void ASleedCharacter::Move(const FInputActionValue& Value)
 {
+	if (IsStunned()) return;
+
 	const FVector2D MovementVector = Value.Get<FVector2D>();
 
 	const FRotator Rotation = Controller->GetControlRotation();
@@ -208,7 +210,10 @@ void ASleedCharacter::Look(const FInputActionValue& Value)
 }
 
 void ASleedCharacter::Jump()
-{	// jump is called both on server and client - reasoning not found yet!
+{	
+	if (IsStunned()) return;
+
+	// jump is called both on server and client - reasoning not found yet!
 	if (this->JumpCurrentCount == 0)
 	{
 		MovementComp->JumpZVelocity = firstJumpHeight;
@@ -240,7 +245,9 @@ void ASleedCharacter::Landed(const FHitResult& Hit)
 }
 
 void ASleedCharacter::EquipButtonPressed()
-{
+{	
+	if (IsStunned()) return;
+
 	if (Combat)
 	{
 		if (HasAuthority())
@@ -264,7 +271,9 @@ void ASleedCharacter::ServerEquipButtonPressed_Implementation()
 }
 
 void ASleedCharacter::Sprint()
-{
+{	
+	if (IsStunned()) return;
+
 	if (Stamina <= 0) return;
 
 	GetWorldTimerManager().ClearTimer(SprintTimer);
@@ -361,6 +370,11 @@ void ASleedCharacter::OnMovementModeChanged(EMovementMode PrevMovementMode, uint
 	{
 		// keep for the future
 	}
+}
+
+bool ASleedCharacter::IsStunned()
+{
+	return CharacterStunState > ECharacterStunState::ECS_Init;
 }
 
 void ASleedCharacter::XButtonPressed()

@@ -33,5 +33,7 @@ void USleedAnimInstance::NativeUpdateAnimation(float DeltaTime)
 	bIsAccelerating = SleedCharacter->GetCharacterMovement()->GetCurrentAcceleration().Size() > 0.f ? true : false;
 
 	bWeaponEquipped = SleedCharacter->IsWeaponEquipped();
+
+	CharStunState = SleedCharacter->GetCharacterStunState();
 }
 

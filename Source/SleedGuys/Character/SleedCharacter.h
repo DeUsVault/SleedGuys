@@ -226,6 +226,10 @@ private:
 
 	void UpdateHUDGold();
 
+	//
+	// stun
+	//
+	bool IsStunned();
 public:
 	// Place for Getters/Setters only
 	//

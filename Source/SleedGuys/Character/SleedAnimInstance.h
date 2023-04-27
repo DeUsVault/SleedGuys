@@ -39,5 +39,8 @@ private:
 
 	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
 	bool bWeaponEquipped;
+
+	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
+	ECharacterStunState CharStunState = ECharacterStunState::ECS_Init;
 	
 };
