@@ -48,6 +48,8 @@ void AProjectile::BeginPlay()
 void AProjectile::BindOverlapTimerFinished()
 {
 	OverlapSphere->OnComponentBeginOverlap.AddDynamic(this, &AProjectile::OnSphereOverlap);
+
+	GetWorldTimerManager().ClearTimer(BindOverlapTimer);
 }
 
 void AProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)

@@ -18,7 +18,9 @@ void AForceProjectile::BeginPlay()
 }
 
 void AForceProjectile::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
-{
+{	
+	if (IsPendingKill()) return;
+
 	float Speed = this->GetVelocity().Size();
 	if (Speed <= MinVelocityOverlapTrigger)
 	{
@@ -49,6 +51,8 @@ void AForceProjectile::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent,
 
 void AForceProjectile::CheckDestruction()
 {	
+	if (IsPendingKill()) return;
+
 	DestructionNumChecks++;
 
 	float Speed = this->GetVelocity().Size();

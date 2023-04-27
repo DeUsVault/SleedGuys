@@ -195,16 +195,6 @@ void ASleedCharacter::Move(const FInputActionValue& Value)
 	AddMovementInput(ForwardDirection, MovementVector.Y);
 	const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 	AddMovementInput(RightDirection, MovementVector.X);
-
-	/*const FVector2D MovementVector = Value.Get<FVector2D>();
-
-	const FRotator Rotation = GetActorRotation();
-	const FRotator YawRotation(0.f, Rotation.Yaw, 0.f);
-
-	const FVector ForwardDirection = GetActorForwardVector();
-	AddMovementInput(ForwardDirection, MovementVector.Y);
-	const FVector RightDirection = FVector::CrossProduct(ForwardDirection, FVector(0.f, 0.f, 1.f));
-	AddMovementInput(RightDirection, MovementVector.X);*/
 }
 
 void ASleedCharacter::Look(const FInputActionValue& Value)
@@ -303,7 +293,6 @@ void ASleedCharacter::SprintTimerFinished()
 
 void ASleedCharacter::ServerSprint_Implementation(float Speed, bool breduceStamina)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, TEXT("boooooom"));
 	MovementComp->MaxWalkSpeed = Speed;
 	if (breduceStamina)
 	{
@@ -370,11 +359,7 @@ void ASleedCharacter::OnMovementModeChanged(EMovementMode PrevMovementMode, uint
 	
 	if (PrevMovementMode == MOVE_Falling && MovementComp->MovementMode != MOVE_Falling)
 	{
-		// Reset FallingLateralFriction to its original value (AirFriction)
-		if (MovementComp)
-		{
-			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, TEXT("im down OnMovementModeChanged"));
-		}
+		// keep for the future
 	}
 }
 
@@ -384,7 +369,6 @@ void ASleedCharacter::XButtonPressed()
 
 	if (HasAuthority())
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, TEXT("authority"));
 		ButtonPresses++;
 		UpdateStunButtonHUD(ButtonPresses);
 		HandleButtonPress();
@@ -406,14 +390,6 @@ void ASleedCharacter::ServerButtonPressed_Implementation()
 
 void ASleedCharacter::OnRep_CharStunState()
 {	
-	if (HasAuthority())
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("authority rep charstate"));
-	}
-	else
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("client rep charstate"));
-	}
 	ButtonPresses = 0;
 	StunWidgetVisibility(CharacterStunState);
 }
@@ -444,12 +420,14 @@ void ASleedCharacter::UpdateStunButtonHUD(int32 num)
 }
 
 void ASleedCharacter::ChangeStunState(ECharacterStunState StunState)
-{	
+{
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("step1"));
 	ServerChangeStunState(StunState);
 }
 
 void ASleedCharacter::ServerChangeStunState_Implementation(ECharacterStunState StunState)
 {	
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("step2"));
 	if (CharacterStunState != StunState)
 	{
 		CharacterStunState = StunState;

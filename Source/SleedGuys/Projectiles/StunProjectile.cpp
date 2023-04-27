@@ -14,12 +14,14 @@ AStunProjectile::AStunProjectile()
 void AStunProjectile::BeginPlay()
 {	
 	Super::BeginPlay();
-
+	
 	GetWorldTimerManager().SetTimer(DestroyTimerHandle, this, &AStunProjectile::CheckDestruction, DestroyCheckRate, true);
 }
 
 void AStunProjectile::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
-{
+{	
+	if (IsPendingKill()) return;
+
 	if (OtherActor)
 	{
 		ASleedCharacter* HittedCharacter = Cast<ASleedCharacter>(OtherActor);
@@ -36,7 +38,9 @@ void AStunProjectile::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, 
 }
 
 void AStunProjectile::CheckDestruction()
-{
+{	
+	if (IsPendingKill()) return;
+
 	DestructionNumChecks++;
 
 	if (DestructionNumChecks > 1)

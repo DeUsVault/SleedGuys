@@ -2,9 +2,3 @@
 
 
 #include "ButtonPresser.h"
-#include "Components/Button.h"
-
-void UButtonPresser::NativeConstruct()
-{	
-	Super::NativeConstruct();
-}

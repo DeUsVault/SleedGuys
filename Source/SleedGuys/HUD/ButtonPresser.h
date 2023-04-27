@@ -31,6 +31,5 @@ public:
 	UButton* ThirdButton;
 
 protected:
-	virtual void NativeConstruct() override;
 	
 };
