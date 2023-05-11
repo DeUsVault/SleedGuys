@@ -27,7 +27,6 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
-
 	virtual void PostInitializeComponents() override;
 
 	virtual void Landed(const FHitResult& Hit) override;
@@ -43,13 +42,9 @@ public:
 	void XButtonPressed();
 
 	// Stamina Functions
-	//
-	//
 	void UpdateHUDStamina();
 
-	//
-	// movement mode change functions
-	//
+	// MovementMode change functions
 	void ChangeAirFrictionAndLunch(FVector LaunchPower);
 	virtual void OnMovementModeChanged(EMovementMode PrevMovementMode, uint8 PreviousCustomMode = 0) override;
 
@@ -59,13 +54,8 @@ public:
 	float GroundFriction = 8.f;
 	float AirFriction = 0.f;
 
-	//
-	// stun mechanic functions
-	//
+	// Stun mechanic functions
 	void ChangeStunState(ECharacterStunState StunState);
-
-	UFUNCTION(Server, Reliable)
-	void ServerChangeStunState(ECharacterStunState StunState);
 
 protected:
 	virtual void BeginPlay() override;
@@ -91,51 +81,21 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Input")
 	UInputAction* XButtonAction;
 
-	UPROPERTY(Replicated, ReplicatedUsing = OnRep_CharStunState, VisibleAnywhere, Category = "Stun")
-	ECharacterStunState CharacterStunState = ECharacterStunState::ECS_Init;
-
-	UFUNCTION()
-	void OnRep_CharStunState();
-
-	UFUNCTION(Client, Reliable)
-	void ClientStunStateChanged(ECharacterStunState StunState);
-
-	void StunWidgetVisibility(ECharacterStunState StunState = ECharacterStunState::ECS_Default);
-
-	UFUNCTION(Server, Reliable)
-	void ServerButtonPressed();
-
-	UPROPERTY(VisibleAnywhere, Category = "Stun")
-	int32 ButtonPresses = 0;
-
-	void HandleButtonPress();
-
-	void UpdateStunButtonHUD(int32 num);
-
 private:
 	// Controller
-	//
-	//
-
 	ASleedPlayerController* SleedPlayerController;
 
 	// Camera
-	//
-	//
 	UPROPERTY(EditAnywhere, Category = Camera)
 	USpringArmComponent* CameraBoom;
 
 	UPROPERTY(EditAnywhere, Category = Camera)
 	UCameraComponent* FollowCamera;
 
-	//
-	// character movement component
-	//
+	// CharacterMovementComponent
 	UCharacterMovementComponent* MovementComp;
 
 	// Jump Logic
-	//
-	//
 	UPROPERTY(EditAnywhere, Category = "Player Stats")
 	float firstJumpHeight = 420.f;
 
@@ -149,8 +109,6 @@ private:
 	bool bShouldDoubleJump;
 
 	// Weapon Logic
-	//
-	//
 	UPROPERTY(Replicated, ReplicatedUsing = OnRep_OverlappingWeapon)
 	ABaseWeapon* OverlappingWeapon;
 
@@ -160,21 +118,17 @@ private:
 	UFUNCTION(Server, Reliable)
 	void ServerEquipButtonPressed();
 
-	// Combat Logic
-	//
-	//
+	// CombatComponent
 	UPROPERTY(VisibleAnywhere)
 	UCombatComp* Combat;
 
-	// Buff Component logic
-	//
-	//
+	bool IsStunned();
+
+	// BuffComponent 
 	UPROPERTY(VisibleAnywhere)
 	UBuffComponent* Buff;
 
 	// Character Attributes
-	//
-	//
 	UPROPERTY(EditAnywhere, Category = "Player Stats")
 	float MaxHealth = 100.f;
 
@@ -193,9 +147,15 @@ private:
 	UFUNCTION()
 	void OnRep_Stamina();
 
-	// Sprint 
-	//
-	//
+	UPROPERTY(ReplicatedUsing = OnRep_Gold, VisibleAnywhere, Category = "Player Stats")
+	int32 Gold;
+
+	UFUNCTION()
+	void OnRep_Gold();
+
+	void UpdateHUDGold();
+
+	// Sprint Functions
 	UPROPERTY(EditAnywhere, Category = "Player Stats")
 	float OriginalSpeed = 600.f;
 
@@ -215,34 +175,40 @@ private:
 	UFUNCTION(Server, Reliable)
 	void ServerSprint(float Speed, bool breduceStamina);
 
-	//
-	// Coins
-	//
-	UPROPERTY(ReplicatedUsing = OnRep_Gold, VisibleAnywhere, Category = "Resources")
-	int32 Gold;
+	// Stun Functions
+	UPROPERTY(Replicated, ReplicatedUsing = OnRep_CharStunState, VisibleAnywhere, Category = "Stun")
+	ECharacterStunState CharacterStunState = ECharacterStunState::ECS_Init;
+
+	UPROPERTY(VisibleAnywhere, Category = "Stun")
+	int32 ButtonPresses = 0;
+
+	UFUNCTION(Server, Reliable)
+	void ServerButtonPressed();
+
+	UFUNCTION(Server, Reliable)
+	void ServerChangeStunState(ECharacterStunState StunState);
+
+	UFUNCTION(Client, Reliable)
+	void ClientStunStateChanged(ECharacterStunState StunState);
 
 	UFUNCTION()
-	void OnRep_Gold();
+	void OnRep_CharStunState();
 
-	void UpdateHUDGold();
+	void HandleButtonPress();
+	void StunWidgetVisibility(ECharacterStunState StunState = ECharacterStunState::ECS_Default);
+	void UpdateStunButtonHUD(int32 num);
 
-	//
-	// stun
-	//
-	bool IsStunned();
 public:
 	// Place for Getters/Setters only
-	//
-	//
 	void SetOverlappingWeapon(ABaseWeapon* Weapon);
-	FORCEINLINE bool getShouldDoubleJump() { return this->bShouldDoubleJump; }
 	bool IsWeaponEquipped();
+	FORCEINLINE bool getShouldDoubleJump() { return this->bShouldDoubleJump; }
 	FORCEINLINE UBuffComponent* GetBuff() const { return this->Buff; }
 	FORCEINLINE float GetStamina() const { return Stamina; }
 	FORCEINLINE float GetMaxStamina() const { return MaxStamina; }
 	FORCEINLINE void SetStamina(float Amount) { Stamina = Amount; }
 	void AddGold(int32 AmountOfGold);
-	FORCEINLINE int32 GetGold() const { return Gold; }
-	FORCEINLINE ECharacterStunState GetCharacterStunState() const { return CharacterStunState; }
+	FORCEINLINE int32 GetGold() const { return this->Gold; }
+	FORCEINLINE ECharacterStunState GetCharacterStunState() const { return this->CharacterStunState; }
 
 };
