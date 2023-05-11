@@ -8,7 +8,6 @@
 
 class UBoxComponent;
 class AProjectile;
-class AStaticMeshActor;
 
 UCLASS()
 class SLEEDGUYS_API ATurret : public AActor
@@ -28,7 +27,7 @@ protected:
 	TSubclassOf<AProjectile> ProjectileClass;
 
 	UPROPERTY(EditInstanceOnly)
-	TArray<AStaticMeshActor*> PossibleTargets;
+	TArray<AActor*> PossibleTargets;
 
 private:	
 	UPROPERTY(VisibleAnywhere, Category = "Components")

@@ -31,6 +31,10 @@ void AObstacle::Tick(float DeltaTime)
     }
 }
 
+void AObstacle::BindOverlap()
+{
+}
+
 void AObstacle::MoveOnAxis(float DeltaTime)
 {
 	CurrentLocation = GetActorLocation();

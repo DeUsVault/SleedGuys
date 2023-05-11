@@ -3,7 +3,7 @@
 
 #include "ObstacleArray.h"
 #include "Obstacle.h"
-#include "ObstacleOverlap.h"
+#include "ObstacleMeshOverlap.h"
 
 AObstacleArray::AObstacleArray()
 {
@@ -40,7 +40,7 @@ void AObstacleArray::HandleObstaclesNew(int32 Selection)
 	{
 		if (ObstacleArray[Selection])
 		{	
-			AObstacleOverlap* ObstacleOverlap = Cast<AObstacleOverlap>(ObstacleArray[Selection]);
+			AObstacleMeshOverlap* ObstacleOverlap = Cast<AObstacleMeshOverlap>(ObstacleArray[Selection]);
 			if (ObstacleOverlap)
 			{
 				ObstacleOverlap->BindOverlap();

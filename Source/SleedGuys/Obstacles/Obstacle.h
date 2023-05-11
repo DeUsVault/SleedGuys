@@ -15,6 +15,8 @@ public:
 	AObstacle();
 	virtual void Tick(float DeltaTime) override;
 
+	virtual void BindOverlap();
+
 protected:
 	virtual void BeginPlay() override;
 

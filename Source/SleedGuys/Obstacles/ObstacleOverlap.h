@@ -20,7 +20,7 @@ public:
 	AObstacleOverlap();
 
 	// bind overlap is called on the actor from another actor, for example from the ObstacleArray
-	void BindOverlap();
+	virtual void BindOverlap() override;
 
 protected:
 	UPROPERTY(EditAnywhere)

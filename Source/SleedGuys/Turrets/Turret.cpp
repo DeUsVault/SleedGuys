@@ -4,7 +4,6 @@
 #include "Turret.h"
 #include "Components/BoxComponent.h"
 #include "SleedGuys/Projectiles/Projectile.h"
-#include "Engine/StaticMeshActor.h"
 
 ATurret::ATurret()
 {
@@ -45,16 +44,22 @@ void ATurret::Fire()
 		if (TargetsNum > 0)
 		{
 			int32 Selection = FMath::RandRange(0, TargetsNum - 1);
-			AStaticMeshActor* Mesh = PossibleTargets[Selection];
-			if (Mesh)
-			{	
-				// calculate the rotation our projectile should have, by taking into account the target's location/rotation
-				FVector HitTarget = Mesh->GetActorLocation();
-				FVector ToTarget = HitTarget - ProjectileSpawnPointLocation;
-				FRotator TargetRotation = ToTarget.Rotation();
+			if (PossibleTargets[Selection])
+			{
+				AActor* Actor = Cast<AActor>(PossibleTargets[Selection]);
+				if (Actor)
+				{
+					// calculate the rotation our projectile should have, by taking into account the target's location/rotation
+					FVector HitTarget = Actor->GetActorLocation();
+					FVector ToTarget = HitTarget - ProjectileSpawnPointLocation;
+					FRotator TargetRotation = ToTarget.Rotation();
 
-				AProjectile* Projectile = GetWorld()->SpawnActor<AProjectile>(ProjectileClass, ProjectileSpawnPointLocation, TargetRotation);
-				Projectile->SetOwner(this);
+					if (ProjectileClass)
+					{
+						AProjectile* Projectile = GetWorld()->SpawnActor<AProjectile>(ProjectileClass, ProjectileSpawnPointLocation, TargetRotation);
+						Projectile->SetOwner(this);
+					}
+				}
 			}
 		}
 	}
