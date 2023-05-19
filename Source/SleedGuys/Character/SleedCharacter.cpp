@@ -7,9 +7,12 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Net/UnrealNetwork.h"
 #include "SleedGuys/Weapon/BaseWeapon.h"
+#include "SleedGuys/RopeSwing/RopeSwing.h"
 #include "SleedGuys/SleederComponents/CombatComp.h"
 #include "SleedGuys/SleederComponents/BuffComponent.h"
 #include "SleedGuys/PlayerController/SleedPlayerController.h"
+
+#include "CableComponent.h"
 
 #include "Components/InputComponent.h"
 #include "EnhancedInputComponent.h"
@@ -85,6 +88,11 @@ void ASleedCharacter::Tick(float DeltaTime)
 		MovementComp->SafeMoveUpdatedComponent(FVector(0.f, 0.f, -0.01f), GetActorRotation(), true, OutHit);
 	}
 
+	if (bIsRoping)
+	{	
+		RopeSwing();
+	}
+
 	/* way to check timerhandle
 		if (GEngine)
 			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("World delta for current frame equals %f"), GetWorldTimerManager().GetTimerElapsed(SprintTimer)));
@@ -102,6 +110,7 @@ void ASleedCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ASleedCharacter::Jump);
 		EnhancedInputComponent->BindAction(EquipAction, ETriggerEvent::Triggered, this, &ASleedCharacter::EquipButtonPressed);
 		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Triggered, this, &ASleedCharacter::Sprint);
+		EnhancedInputComponent->BindAction(RopeAction, ETriggerEvent::Triggered, this, &ASleedCharacter::RopeButtonPressed);
 
 		EnhancedInputComponent->BindAction(XButtonAction, ETriggerEvent::Triggered, this, &ASleedCharacter::XButtonPressed);
 	}
@@ -117,6 +126,7 @@ void ASleedCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutL
 	DOREPLIFETIME(ASleedCharacter, Stamina);
 	DOREPLIFETIME(ASleedCharacter, Gold);
 	DOREPLIFETIME(ASleedCharacter, CharacterStunState);
+	DOREPLIFETIME_CONDITION(ASleedCharacter, OverlappingRopeSwing, COND_OwnerOnly);
 }
 
 void ASleedCharacter::PostInitializeComponents()
@@ -187,6 +197,11 @@ bool ASleedCharacter::IsWeaponEquipped()
 void ASleedCharacter::Move(const FInputActionValue& Value)
 {
 	if (IsStunned()) return;
+
+	if (bIsRoping)
+	{
+		//return;
+	}
 
 	const FVector2D MovementVector = Value.Get<FVector2D>();
 
@@ -474,4 +489,84 @@ void ASleedCharacter::StunWidgetVisibility(ECharacterStunState StunState)
 	{
 		SleedPlayerController->HandleStunWidget(true); // add widget to screen
 	}
+}
+
+void ASleedCharacter::RopeButtonPressed()
+{	
+	if (IsStunned()) return;
+
+	if (HasAuthority())
+	{
+		CreateCable();
+	}
+	else
+	{
+		// calling this on the client, executing it on the server
+		ServerRopeButtonPressed();
+	}
+}
+
+void ASleedCharacter::ServerRopeButtonPressed_Implementation()
+{
+	CreateCable();
+}
+
+void ASleedCharacter::CreateCable()
+{
+	if (OverlappingRopeSwing == nullptr) return;
+
+	OverlappingRopeSwing->SpawnCable(this);
+}
+
+void ASleedCharacter::SetOverlappingRopeSwing(ARopeSwing* RopeSwing)
+{
+	if (OverlappingRopeSwing)
+	{
+		OverlappingRopeSwing->ShowPickupWidget(false);
+	}
+	OverlappingRopeSwing = RopeSwing;
+	if (IsLocallyControlled())
+	{
+		if (OverlappingRopeSwing)
+		{
+			OverlappingRopeSwing->ShowPickupWidget(true);
+		}
+	}
+}
+
+void ASleedCharacter::OnRep_OverlappingRopeSwing(ARopeSwing* LastRopeSwing)
+{
+	if (OverlappingRopeSwing)
+	{
+		OverlappingRopeSwing->ShowPickupWidget(true);
+	}
+	if (LastRopeSwing)
+	{
+		LastRopeSwing->ShowPickupWidget(false);
+	}
+}
+
+void ASleedCharacter::RopeSwing(FInputActionValue Value)
+{	
+	if (OverlappingRopeSwing == nullptr) return;
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Green, TEXT("test"));
+
+	FVector Velocity = MovementComp->Velocity;
+
+	FVector MyLocation = GetActorLocation();
+	FVector SwingLocation = OverlappingRopeSwing->GetActorLocation();
+
+	FVector Distance = MyLocation - SwingLocation;
+	FVector DistanceNormalized = Distance.GetSafeNormal();
+
+	float DotProduct = FVector::DotProduct(Velocity, Distance);
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Float Value: %f"), DotProduct));
+
+
+	FVector Force = DistanceNormalized * DotProduct * (-2.f);
+
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Green, FString::Printf(TEXT("Force: %s"), *Force.ToString()));
+
+	// Apply the force to the character's rigid body
+	GetCharacterMovement()->AddForce(Force);
 }

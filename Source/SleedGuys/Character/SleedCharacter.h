@@ -16,6 +16,8 @@ class ABaseWeapon;
 class UCombatComp;
 class UBuffComponent;
 class ASleedPlayerController;
+class ARopeSwing;
+class UCableComponent;
 
 UCLASS()
 class SLEEDGUYS_API ASleedCharacter : public ACharacter
@@ -40,6 +42,7 @@ public:
 	void EquipButtonPressed();
 	void Sprint();
 	void XButtonPressed();
+	void RopeButtonPressed();
 
 	// Stamina Functions
 	void UpdateHUDStamina();
@@ -80,6 +83,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = "Input")
 	UInputAction* XButtonAction;
+
+	UPROPERTY(EditAnywhere, Category = "Input")
+	UInputAction* RopeAction;
 
 private:
 	// Controller
@@ -210,5 +216,22 @@ public:
 	void AddGold(int32 AmountOfGold);
 	FORCEINLINE int32 GetGold() const { return this->Gold; }
 	FORCEINLINE ECharacterStunState GetCharacterStunState() const { return this->CharacterStunState; }
+
+	// Rope Logic
+	void SetOverlappingRopeSwing(ARopeSwing* RopeSwing);
+	UPROPERTY(Replicated, ReplicatedUsing = OnRep_OverlappingRopeSwing)
+	ARopeSwing* OverlappingRopeSwing;
+
+	UFUNCTION()
+	void OnRep_OverlappingRopeSwing(ARopeSwing* LastRopeSwing);
+
+	void CreateCable();
+
+	UFUNCTION(Server, Reliable)
+	void ServerRopeButtonPressed();
+
+	void RopeSwing(FInputActionValue Value = 0.f);
+
+	bool bIsRoping = false;
 
 };
