@@ -10,7 +10,6 @@ class USphereComponent;
 class UWidgetComponent;
 class ASleedCharacter;
 class UCableComponent;
-class UPhysicsConstraintComponent;
 
 UCLASS()
 class SLEEDGUYS_API ARopeSwing : public AActor
@@ -58,8 +57,5 @@ private:
 
 	UPROPERTY(VisibleAnywhere)
 	UCableComponent* Cable;
-
-	UPROPERTY(VisibleAnywhere)
-	UPhysicsConstraintComponent* PhysicsConstraint;
 
 };

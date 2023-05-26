@@ -48,6 +48,10 @@ ASleedCharacter::ASleedCharacter()
 
 	Buff = CreateDefaultSubobject<UBuffComponent>(TEXT("BuffComponent"));
 	Buff->SetIsReplicated(true);
+
+	Cable = CreateDefaultSubobject<UCableComponent>(TEXT("CableComponent"));
+	Cable->SetupAttachment(GetRootComponent());
+	Cable->SetIsReplicated(true);
 }
 
 void ASleedCharacter::BeginPlay()
@@ -74,6 +78,12 @@ void ASleedCharacter::BeginPlay()
 		AirFriction = MovementComp->FallingLateralFriction;
 	}
 
+	if (Cable)
+	{	
+		Cable->SetVisibility(false);
+		Cable->SetActive(false);
+	}
+
 	Tags.Add(FName("SleedCharacter"));
 }
 
@@ -90,7 +100,8 @@ void ASleedCharacter::Tick(float DeltaTime)
 
 	if (bIsRoping)
 	{	
-		RopeSwing();
+		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("step2"));
+		RopeSwing(DeltaTime);
 	}
 
 	/* way to check timerhandle
@@ -127,6 +138,8 @@ void ASleedCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutL
 	DOREPLIFETIME(ASleedCharacter, Gold);
 	DOREPLIFETIME(ASleedCharacter, CharacterStunState);
 	DOREPLIFETIME_CONDITION(ASleedCharacter, OverlappingRopeSwing, COND_OwnerOnly);
+	DOREPLIFETIME(ASleedCharacter, bIsRoping);
+	DOREPLIFETIME(ASleedCharacter, Cable);
 }
 
 void ASleedCharacter::PostInitializeComponents()
@@ -198,11 +211,6 @@ void ASleedCharacter::Move(const FInputActionValue& Value)
 {
 	if (IsStunned()) return;
 
-	if (bIsRoping)
-	{
-		//return;
-	}
-
 	const FVector2D MovementVector = Value.Get<FVector2D>();
 
 	const FRotator Rotation = Controller->GetControlRotation();
@@ -227,6 +235,13 @@ void ASleedCharacter::Look(const FInputActionValue& Value)
 void ASleedCharacter::Jump()
 {	
 	if (IsStunned()) return;
+
+	if (bIsRoping)
+	{	
+		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("jumptroll"));
+		ServerBreakCable();
+		return;
+	}
 
 	// jump is called both on server and client - reasoning not found yet!
 	if (this->JumpCurrentCount == 0)
@@ -450,13 +465,11 @@ void ASleedCharacter::UpdateStunButtonHUD(int32 num)
 
 void ASleedCharacter::ChangeStunState(ECharacterStunState StunState)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("step1"));
 	ServerChangeStunState(StunState);
 }
 
 void ASleedCharacter::ServerChangeStunState_Implementation(ECharacterStunState StunState)
 {	
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("step2"));
 	if (CharacterStunState != StunState)
 	{
 		CharacterStunState = StunState;
@@ -495,27 +508,74 @@ void ASleedCharacter::RopeButtonPressed()
 {	
 	if (IsStunned()) return;
 
-	if (HasAuthority())
+	if (!bIsRoping)
+	{	
+		ServerCreateCable();
+	}
+}
+
+void ASleedCharacter::ServerCreateCable_Implementation()
+{	
+	if (OverlappingRopeSwing == nullptr) return;
+	MulticastUpdateCable(false);
+}
+
+void ASleedCharacter::ServerBreakCable_Implementation()
+{
+	MulticastUpdateCable(true);
+}
+
+void ASleedCharacter::MulticastUpdateCable_Implementation(bool bBreak)
+{
+	if (bBreak)
 	{
-		CreateCable();
+		if (Cable)
+		{
+			if (Cable->IsActive())
+			{
+				Cable->SetAttachEndToComponent(GetMesh(), NAME_None);
+				Cable->SetVisibility(false);
+				Cable->SetActive(false);
+			}
+
+			bIsRoping = false;
+		}
+
+		if (OverlappingRopeSwing)
+		{
+			OverlappingRopeSwing->ShowPickupWidget(true);
+		}
 	}
 	else
 	{
-		// calling this on the client, executing it on the server
-		ServerRopeButtonPressed();
+		if (Cable)
+		{
+			if (!Cable->IsActive())
+			{
+				Cable->SetActive(true);
+				Cable->SetIsReplicated(true);
+				Cable->SetVisibility(true);
+			}
+
+			FAttachmentTransformRules AttachmentRules(EAttachmentRule::KeepRelative, false);
+			Cable->AttachToComponent(GetMesh(), AttachmentRules, FName("RightHandSocket"));
+
+			if (OverlappingRopeSwing)
+			{
+				Cable->SetAttachEndToComponent(OverlappingRopeSwing->GetRootComponent(), NAME_None);
+
+				FVector CharacterLocation = GetActorLocation();
+				FVector RopeSwingLocation = OverlappingRopeSwing->GetActorLocation();
+
+				float Distance = FVector::Dist(CharacterLocation, RopeSwingLocation);
+				Cable->CableLength = Distance - 300.f;
+
+				OverlappingRopeSwing->ShowPickupWidget(false);
+			}
+
+			bIsRoping = true;
+		}
 	}
-}
-
-void ASleedCharacter::ServerRopeButtonPressed_Implementation()
-{
-	CreateCable();
-}
-
-void ASleedCharacter::CreateCable()
-{
-	if (OverlappingRopeSwing == nullptr) return;
-
-	OverlappingRopeSwing->SpawnCable(this);
 }
 
 void ASleedCharacter::SetOverlappingRopeSwing(ARopeSwing* RopeSwing)
@@ -546,27 +606,69 @@ void ASleedCharacter::OnRep_OverlappingRopeSwing(ARopeSwing* LastRopeSwing)
 	}
 }
 
-void ASleedCharacter::RopeSwing(FInputActionValue Value)
+void ASleedCharacter::RopeSwing(float DeltaTime)
 {	
 	if (OverlappingRopeSwing == nullptr) return;
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Green, TEXT("test"));
 
+	// character velocity
 	FVector Velocity = MovementComp->Velocity;
 
+	// distance between character and ropeswing point
 	FVector MyLocation = GetActorLocation();
 	FVector SwingLocation = OverlappingRopeSwing->GetActorLocation();
-
 	FVector Distance = MyLocation - SwingLocation;
+
+	if (Cable)
+	{
+		Cable->CableLength = FVector::Dist(MyLocation, SwingLocation) - 300.f;
+	}
+
+	// get the direction of the distance vector
 	FVector DistanceNormalized = Distance.GetSafeNormal();
 
+	// how much of the character's velocity is aligned with the direction of the rope swing
 	float DotProduct = FVector::DotProduct(Velocity, Distance);
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Float Value: %f"), DotProduct));
 
+	/*	FINAL FORCE: DotProduct * (-2.f) part means:
+		When the dot product is positive, it means the character is moving in the same general direction as the rope swing.
+		In this case, multiplying the dot product by - 2 will result in a negative force, which essentially means the force will act in the opposite direction
+		of the character's velocity. This can create a decelerating effect, slowing down the character's movement and potentially facilitating a swinging motion.
 
+		When the dot product is negative, it means the character is moving in the opposite direction of the rope swing.In this case, 
+		multiplying the dot product by - 2 will result in a positive force, which means the force will act in the same direction as the character's velocity. 
+		This can provide a slight additional push in the same direction as the character's movement, potentially aiding the swinging motion. 
+	*/
+	
 	FVector Force = DistanceNormalized * DotProduct * (-2.f);
-
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Green, FString::Printf(TEXT("Force: %s"), *Force.ToString()));
 
 	// Apply the force to the character's rigid body
 	GetCharacterMovement()->AddForce(Force);
+
+	AddSwingRotation(Distance, DeltaTime);
+}
+
+void ASleedCharacter::AddSwingRotation(FVector& Distance, float DeltaTime)
+{
+	// Exclude the Z-axis rotation
+	Distance.Z = 15.0f;
+
+	// Calculate the rotation using the modified direction vector
+	FRotator DesiredRotation = (-Distance).Rotation();
+
+	// Get the character's velocity
+	FVector Velocity = GetVelocity();
+
+	// Calculate the dot product between the distance vector and velocity vector
+	float DotProduct = FVector::DotProduct(Distance.GetSafeNormal(), Velocity.GetSafeNormal());
+
+	// Adjust the desired rotation based on the dot product and velocity
+	float MinDotProduct = 0.0f; // Minimum dot product value to rotate
+	DesiredRotation.Yaw = FMath::Lerp(DesiredRotation.Yaw, GetActorRotation().Yaw, FMath::Clamp(DotProduct, MinDotProduct, 1.0f));
+
+	// Interpolate between the current rotation and the desired rotation
+	float InterpSpeed = 3.0f; // Adjust this value to control the rotation speed
+	FRotator NewRotation = FMath::RInterpTo(GetActorRotation(), DesiredRotation, DeltaTime, InterpSpeed);
+
+	// Set the rotation for your character
+	SetActorRotation(NewRotation);
 }

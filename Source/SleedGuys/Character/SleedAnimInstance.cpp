@@ -35,5 +35,7 @@ void USleedAnimInstance::NativeUpdateAnimation(float DeltaTime)
 	bWeaponEquipped = SleedCharacter->IsWeaponEquipped();
 
 	CharStunState = SleedCharacter->GetCharacterStunState();
+
+	bIsRoping = SleedCharacter->bIsRoping;
 }
 

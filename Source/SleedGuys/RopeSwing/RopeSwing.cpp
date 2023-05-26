@@ -7,7 +7,6 @@
 #include "Components/SphereComponent.h"
 #include "Components/WidgetComponent.h"
 #include "CableComponent.h"
-#include "PhysicsEngine/PhysicsConstraintComponent.h"
 #include "Net/UnrealNetwork.h"
 
 
@@ -52,7 +51,6 @@ void ARopeSwing::SpawnCable(ASleedCharacter* Character)
 	{
 		Cable->RegisterComponent();
 		Cable->SetIsReplicated(true);
-		Cable->SetSimulatePhysics(true);
 
 		FAttachmentTransformRules AttachmentRules(EAttachmentRule::KeepRelative, false);
 		Cable->AttachToComponent(RootComponent, AttachmentRules, NAME_None);
@@ -60,17 +58,17 @@ void ARopeSwing::SpawnCable(ASleedCharacter* Character)
 		if (Character)
 		{
 			Cable->SetAttachEndToComponent(Character->GetMesh(), FName("RightHandSocket"));
+
+			FVector CharacterLocation = Character->GetActorLocation();
+			FVector RopeSwingLocation = GetActorLocation();
+
+			float Distance = FVector::Dist(CharacterLocation, RopeSwingLocation);
+			Cable->CableLength = Distance;
 		}
 	}
 
-	//PhysicsConstraint = NewObject<UPhysicsConstraintComponent>(this);
-	//PhysicsConstraint->RegisterComponent();
-	//PhysicsConstraint->SetWorldLocation(GetActorLocation());
-
 	if (Character)
 	{
-		//PhysicsConstraint->ConstraintActor1 = this;
-		//PhysicsConstraint->ConstraintActor2 = Character;
 		Character->bIsRoping = true;
 	}
 }

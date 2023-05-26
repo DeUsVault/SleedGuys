@@ -101,6 +101,9 @@ private:
 	// CharacterMovementComponent
 	UCharacterMovementComponent* MovementComp;
 
+	UPROPERTY(Replicated, VisibleAnywhere)
+	UCableComponent* Cable;
+
 	// Jump Logic
 	UPROPERTY(EditAnywhere, Category = "Player Stats")
 	float firstJumpHeight = 420.f;
@@ -225,13 +228,20 @@ public:
 	UFUNCTION()
 	void OnRep_OverlappingRopeSwing(ARopeSwing* LastRopeSwing);
 
-	void CreateCable();
+	UFUNCTION(Server, Reliable)
+	void ServerCreateCable();
 
 	UFUNCTION(Server, Reliable)
-	void ServerRopeButtonPressed();
+	void ServerBreakCable();
 
-	void RopeSwing(FInputActionValue Value = 0.f);
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastUpdateCable(bool bBreak);
 
+	void RopeSwing(float DeltaTime);
+
+	void AddSwingRotation(FVector& Distance, float DeltaTime);
+
+	UPROPERTY(Replicated)
 	bool bIsRoping = false;
 
 };
