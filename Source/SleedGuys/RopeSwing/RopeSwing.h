@@ -22,8 +22,6 @@ public:
 
 	void ShowPickupWidget(bool bShowWidget);
 
-	void SpawnCable(ASleedCharacter* Character);
-
 protected:
 	virtual void BeginPlay() override;
 
@@ -46,13 +44,13 @@ protected:
 	);
 
 private:
-	UPROPERTY(EditAnywhere, Category = "Components")
+	UPROPERTY(VisibleAnywhere, Category = "Components")
 	UStaticMeshComponent* BaseMesh;
 
-	UPROPERTY(EditAnywhere, Category = "Components")
+	UPROPERTY(VisibleAnywhere, Category = "Components")
 	USphereComponent* AreaSphere;
 
-	UPROPERTY(VisibleAnywhere, Category = "Weapon Properties")
+	UPROPERTY(VisibleAnywhere, Category = "Swing Widget")
 	UWidgetComponent* RopeSwingWidget;
 
 	UPROPERTY(VisibleAnywhere)

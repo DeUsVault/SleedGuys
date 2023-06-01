@@ -3,11 +3,9 @@
 
 #include "RopeSwing.h"
 #include "SleedGuys/Character/SleedCharacter.h"
-#include "GameFramework/CharacterMovementComponent.h"
 #include "Components/SphereComponent.h"
 #include "Components/WidgetComponent.h"
 #include "CableComponent.h"
-#include "Net/UnrealNetwork.h"
 
 
 ARopeSwing::ARopeSwing()
@@ -23,6 +21,9 @@ ARopeSwing::ARopeSwing()
 	AreaSphere->SetupAttachment(RootComponent);
 	AreaSphere->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 	AreaSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	RopeSwingWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("PickupWidget"));
+	RopeSwingWidget->SetupAttachment(RootComponent);
 }
 
 void ARopeSwing::BeginPlay()
@@ -37,40 +38,16 @@ void ARopeSwing::BeginPlay()
 		AreaSphere->OnComponentBeginOverlap.AddDynamic(this, &ARopeSwing::OnSphereOverlap);
 		AreaSphere->OnComponentEndOverlap.AddDynamic(this, &ARopeSwing::OnSphereEndOverlap);
 	}
+
+	if (RopeSwingWidget)
+	{
+		RopeSwingWidget->SetVisibility(false);
+	}
 }
 
 void ARopeSwing::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-}
-
-void ARopeSwing::SpawnCable(ASleedCharacter* Character)
-{
-	Cable = NewObject<UCableComponent>(this);
-	if (Cable && Character)
-	{
-		Cable->RegisterComponent();
-		Cable->SetIsReplicated(true);
-
-		FAttachmentTransformRules AttachmentRules(EAttachmentRule::KeepRelative, false);
-		Cable->AttachToComponent(RootComponent, AttachmentRules, NAME_None);
-
-		if (Character)
-		{
-			Cable->SetAttachEndToComponent(Character->GetMesh(), FName("RightHandSocket"));
-
-			FVector CharacterLocation = Character->GetActorLocation();
-			FVector RopeSwingLocation = GetActorLocation();
-
-			float Distance = FVector::Dist(CharacterLocation, RopeSwingLocation);
-			Cable->CableLength = Distance;
-		}
-	}
-
-	if (Character)
-	{
-		Character->bIsRoping = true;
-	}
 }
 
 void ARopeSwing::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
@@ -87,7 +64,7 @@ void ARopeSwing::OnSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AA
 	ASleedCharacter* SleedCharacter = Cast<ASleedCharacter>(OtherActor);
 	if (SleedCharacter)
 	{
-		//SleedCharacter->SetOverlappingRopeSwing(nullptr);
+		SleedCharacter->SetOverlappingRopeSwing(nullptr);
 	}
 }
 

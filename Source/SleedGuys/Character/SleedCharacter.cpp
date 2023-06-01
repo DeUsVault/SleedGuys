@@ -10,9 +10,8 @@
 #include "SleedGuys/RopeSwing/RopeSwing.h"
 #include "SleedGuys/SleederComponents/CombatComp.h"
 #include "SleedGuys/SleederComponents/BuffComponent.h"
+#include "SleedGuys/RopeSwing/SleedCableComponent.h"
 #include "SleedGuys/PlayerController/SleedPlayerController.h"
-
-#include "CableComponent.h"
 
 #include "Components/InputComponent.h"
 #include "EnhancedInputComponent.h"
@@ -49,7 +48,7 @@ ASleedCharacter::ASleedCharacter()
 	Buff = CreateDefaultSubobject<UBuffComponent>(TEXT("BuffComponent"));
 	Buff->SetIsReplicated(true);
 
-	Cable = CreateDefaultSubobject<UCableComponent>(TEXT("CableComponent"));
+	Cable = CreateDefaultSubobject<USleedCableComponent>(TEXT("CableComponent"));
 	Cable->SetupAttachment(GetRootComponent());
 	Cable->SetIsReplicated(true);
 }
@@ -100,7 +99,6 @@ void ASleedCharacter::Tick(float DeltaTime)
 
 	if (bIsRoping)
 	{	
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("step2"));
 		RopeSwing(DeltaTime);
 	}
 
@@ -122,8 +120,8 @@ void ASleedCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 		EnhancedInputComponent->BindAction(EquipAction, ETriggerEvent::Triggered, this, &ASleedCharacter::EquipButtonPressed);
 		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Triggered, this, &ASleedCharacter::Sprint);
 		EnhancedInputComponent->BindAction(RopeAction, ETriggerEvent::Triggered, this, &ASleedCharacter::RopeButtonPressed);
-
 		EnhancedInputComponent->BindAction(XButtonAction, ETriggerEvent::Triggered, this, &ASleedCharacter::XButtonPressed);
+		EnhancedInputComponent->BindAction(Celebration, ETriggerEvent::Triggered, this, &ASleedCharacter::Celebrate);
 	}
 }
 
@@ -132,14 +130,15 @@ void ASleedCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutL
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME_CONDITION(ASleedCharacter, OverlappingWeapon, COND_OwnerOnly);
-	DOREPLIFETIME(ASleedCharacter, bShouldDoubleJump);
+	DOREPLIFETIME(ASleedCharacter, JumpState);
 	DOREPLIFETIME(ASleedCharacter, Health);
 	DOREPLIFETIME(ASleedCharacter, Stamina);
 	DOREPLIFETIME(ASleedCharacter, Gold);
 	DOREPLIFETIME(ASleedCharacter, CharacterStunState);
-	DOREPLIFETIME_CONDITION(ASleedCharacter, OverlappingRopeSwing, COND_OwnerOnly);
+	DOREPLIFETIME(ASleedCharacter, OverlappingRopeSwing);
 	DOREPLIFETIME(ASleedCharacter, bIsRoping);
-	DOREPLIFETIME(ASleedCharacter, Cable);
+	DOREPLIFETIME(ASleedCharacter, Cable); 
+	DOREPLIFETIME(ASleedCharacter, bIsCelebrating);
 }
 
 void ASleedCharacter::PostInitializeComponents()
@@ -238,7 +237,6 @@ void ASleedCharacter::Jump()
 
 	if (bIsRoping)
 	{	
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("jumptroll"));
 		ServerBreakCable();
 		return;
 	}
@@ -247,14 +245,14 @@ void ASleedCharacter::Jump()
 	if (this->JumpCurrentCount == 0)
 	{
 		MovementComp->JumpZVelocity = firstJumpHeight;
-		bShouldDoubleJump = false;
+		JumpState = EJumpState::EJS_FirstJump;
 	}
 	else if (this->JumpCurrentCount == 1)
 	{
-		if (Stamina <= 0) return;
+		if (Stamina < JumpCost) return;
 
 		MovementComp->JumpZVelocity = secondJumpHeight;
-		bShouldDoubleJump = true;
+		JumpState = EJumpState::EJS_SecondJump;
 
 		Stamina = FMath::Clamp(Stamina - JumpCost, 0.f, MaxStamina);
 		UpdateHUDStamina();
@@ -265,13 +263,12 @@ void ASleedCharacter::Jump()
 
 void ASleedCharacter::Landed(const FHitResult& Hit)
 {
-	bShouldDoubleJump = false;
+	JumpState = EJumpState::EJS_NoJump;
 
 	if (MovementComp && MovementComp->FallingLateralFriction != AirFriction)
 	{
 		MulticastChangeAirFriction(AirFriction);
 	}
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Landed Trigger"));
 }
 
 void ASleedCharacter::EquipButtonPressed()
@@ -539,6 +536,7 @@ void ASleedCharacter::MulticastUpdateCable_Implementation(bool bBreak)
 			}
 
 			bIsRoping = false;
+			RopeSwingLocation = FVector::ZeroVector;
 		}
 
 		if (OverlappingRopeSwing)
@@ -553,11 +551,10 @@ void ASleedCharacter::MulticastUpdateCable_Implementation(bool bBreak)
 			if (!Cable->IsActive())
 			{
 				Cable->SetActive(true);
-				Cable->SetIsReplicated(true);
 				Cable->SetVisibility(true);
 			}
 
-			FAttachmentTransformRules AttachmentRules(EAttachmentRule::KeepRelative, false);
+			FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, false);
 			Cable->AttachToComponent(GetMesh(), AttachmentRules, FName("RightHandSocket"));
 
 			if (OverlappingRopeSwing)
@@ -565,10 +562,9 @@ void ASleedCharacter::MulticastUpdateCable_Implementation(bool bBreak)
 				Cable->SetAttachEndToComponent(OverlappingRopeSwing->GetRootComponent(), NAME_None);
 
 				FVector CharacterLocation = GetActorLocation();
-				FVector RopeSwingLocation = OverlappingRopeSwing->GetActorLocation();
+				RopeSwingLocation = OverlappingRopeSwing->GetActorLocation();
 
 				float Distance = FVector::Dist(CharacterLocation, RopeSwingLocation);
-				Cable->CableLength = Distance - 300.f;
 
 				OverlappingRopeSwing->ShowPickupWidget(false);
 			}
@@ -608,20 +604,14 @@ void ASleedCharacter::OnRep_OverlappingRopeSwing(ARopeSwing* LastRopeSwing)
 
 void ASleedCharacter::RopeSwing(float DeltaTime)
 {	
-	if (OverlappingRopeSwing == nullptr) return;
+	if (RopeSwingLocation.IsNearlyZero()) return;
 
 	// character velocity
 	FVector Velocity = MovementComp->Velocity;
 
 	// distance between character and ropeswing point
 	FVector MyLocation = GetActorLocation();
-	FVector SwingLocation = OverlappingRopeSwing->GetActorLocation();
-	FVector Distance = MyLocation - SwingLocation;
-
-	if (Cable)
-	{
-		Cable->CableLength = FVector::Dist(MyLocation, SwingLocation) - 300.f;
-	}
+	FVector Distance = MyLocation - RopeSwingLocation;
 
 	// get the direction of the distance vector
 	FVector DistanceNormalized = Distance.GetSafeNormal();
@@ -671,4 +661,16 @@ void ASleedCharacter::AddSwingRotation(FVector& Distance, float DeltaTime)
 
 	// Set the rotation for your character
 	SetActorRotation(NewRotation);
+}
+
+void ASleedCharacter::Celebrate()
+{
+	if (bIsCelebrating)
+	{
+		bIsCelebrating = false;
+	}
+	else
+	{
+		bIsCelebrating = true;
+	}
 }

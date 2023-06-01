@@ -17,7 +17,7 @@ class UCombatComp;
 class UBuffComponent;
 class ASleedPlayerController;
 class ARopeSwing;
-class UCableComponent;
+class USleedCableComponent;
 
 UCLASS()
 class SLEEDGUYS_API ASleedCharacter : public ACharacter
@@ -43,6 +43,7 @@ public:
 	void Sprint();
 	void XButtonPressed();
 	void RopeButtonPressed();
+	void Celebrate();
 
 	// Stamina Functions
 	void UpdateHUDStamina();
@@ -87,6 +88,9 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Input")
 	UInputAction* RopeAction;
 
+	UPROPERTY(EditAnywhere, Category = "Input")
+	UInputAction* Celebration;
+
 private:
 	// Controller
 	ASleedPlayerController* SleedPlayerController;
@@ -102,7 +106,7 @@ private:
 	UCharacterMovementComponent* MovementComp;
 
 	UPROPERTY(Replicated, VisibleAnywhere)
-	UCableComponent* Cable;
+	USleedCableComponent* Cable;
 
 	// Jump Logic
 	UPROPERTY(EditAnywhere, Category = "Player Stats")
@@ -115,7 +119,7 @@ private:
 	float JumpCost = 20.f;
 
 	UPROPERTY(Replicated)
-	bool bShouldDoubleJump;
+	EJumpState JumpState = EJumpState::EJS_NoJump;
 
 	// Weapon Logic
 	UPROPERTY(Replicated, ReplicatedUsing = OnRep_OverlappingWeapon)
@@ -211,7 +215,7 @@ public:
 	// Place for Getters/Setters only
 	void SetOverlappingWeapon(ABaseWeapon* Weapon);
 	bool IsWeaponEquipped();
-	FORCEINLINE bool getShouldDoubleJump() { return this->bShouldDoubleJump; }
+	FORCEINLINE EJumpState getJumpState() { return this->JumpState; }
 	FORCEINLINE UBuffComponent* GetBuff() const { return this->Buff; }
 	FORCEINLINE float GetStamina() const { return Stamina; }
 	FORCEINLINE float GetMaxStamina() const { return MaxStamina; }
@@ -241,7 +245,12 @@ public:
 
 	void AddSwingRotation(FVector& Distance, float DeltaTime);
 
+	FVector RopeSwingLocation;
+
 	UPROPERTY(Replicated)
 	bool bIsRoping = false;
+
+	UPROPERTY(Replicated)
+	bool bIsCelebrating = false;
 
 };
