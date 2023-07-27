@@ -40,7 +40,7 @@ void AObstacleArray::HandleObstaclesNew(int32 Selection)
 	{
 		if (ObstacleArray[Selection])
 		{	
-			AObstacleMeshOverlap* ObstacleOverlap = Cast<AObstacleMeshOverlap>(ObstacleArray[Selection]);
+			AObstacle* ObstacleOverlap = Cast<AObstacle>(ObstacleArray[Selection]);
 			if (ObstacleOverlap)
 			{
 				ObstacleOverlap->BindOverlap();

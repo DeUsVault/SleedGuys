@@ -18,15 +18,5 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 private:
-	//
-	// rotate object logic
-	//
-	UPROPERTY(EditAnywhere, Category = "Custom Rotation")
-	bool bAllowRotation = false;
-
-	UPROPERTY(EditAnywhere, Category = "Custom Rotation")
-	float RotationSpeed = 200.f;
-
-	void RotateActor(float DeltaTime);
 	
 };

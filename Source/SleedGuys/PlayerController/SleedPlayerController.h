@@ -22,6 +22,7 @@ public:
 	void SetHUDGold(int32 CoinsNum);
 	void HandleStunWidget(bool bCreate);
 	void SetHUDStunButtons(int32 num);
+	void SetGameMenuWidget();
 protected:
 	virtual void BeginPlay() override;
 

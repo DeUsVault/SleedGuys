@@ -4,6 +4,7 @@
 #include "Projectile.h"
 #include "Components/SphereComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
+#include "NiagaraFunctionLibrary.h"
 
 AProjectile::AProjectile()
 {
@@ -21,8 +22,6 @@ AProjectile::AProjectile()
 
 	ProjectileMovementComponent = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovementComponent"));
 	ProjectileMovementComponent->bRotationFollowsVelocity = true;
-	ProjectileMovementComponent->InitialSpeed = InitMoveSpeed;
-	ProjectileMovementComponent->MaxSpeed = MaxMoveSpeed;
 }
 
 void AProjectile::Tick(float DeltaTime)
@@ -33,6 +32,12 @@ void AProjectile::Tick(float DeltaTime)
 void AProjectile::BeginPlay()
 {
 	Super::BeginPlay();
+
+	if(ProjectileMovementComponent) 
+	{
+		ProjectileMovementComponent->InitialSpeed = InitMoveSpeed;
+		ProjectileMovementComponent->MaxSpeed = MaxMoveSpeed;
+	}
 
 	if (HasAuthority())
 	{	
@@ -58,5 +63,24 @@ void AProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimi
 
 void AProjectile::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {	
+}
+
+void AProjectile::playNiagaraEffect(UNiagaraSystem* Effect)
+{
+	if (Effect)
+	{
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+			this,
+			Effect,
+			GetActorLocation()
+		);
+	}
+}
+
+void AProjectile::Destroyed()
+{	
+	playNiagaraEffect(DestructionEffect);
+
+	Super::Destroyed();
 }
 

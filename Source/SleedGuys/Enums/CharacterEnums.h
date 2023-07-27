@@ -15,7 +15,8 @@ enum class EJumpState : uint8
 {
 	EJS_NoJump UMETA(DisplayName = "NoJump"),
 	EJS_FirstJump UMETA(DisplayName = "FirstJump"),
-	EJS_SecondJump UMETA(DisplayName = "SecondJump")
+	EJS_SecondJump UMETA(DisplayName = "SecondJump"),
+	EJS_Swinging UMETA(DisplayName = "Swinging"),
 };
 
 UENUM(BlueprintType)

@@ -14,7 +14,8 @@ AObstacleOverlap::AObstacleOverlap()
 }
 
 void AObstacleOverlap::BindOverlap()
-{
+{	
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, TEXT("first bind"));
 	OverlapBox->OnComponentBeginOverlap.AddDynamic(this, &AObstacleOverlap::OnBoxOverlap);
 }
 
@@ -22,5 +23,5 @@ void AObstacleOverlap::OnBoxOverlap(UPrimitiveComponent* OverlappedComponent, AA
 {
 	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("I Do Overlap"));
 
-	Destroy();
+	//Destroy();
 }

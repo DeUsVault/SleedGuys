@@ -24,7 +24,7 @@ protected:
 	virtual void BeginPlay() override;
 
 	UPROPERTY(EditAnywhere)
-	TSubclassOf<AProjectile> ProjectileClass;
+	TArray<TSubclassOf<AProjectile>> ProjectileClasses;
 
 	UPROPERTY(EditInstanceOnly)
 	TArray<AActor*> PossibleTargets;
@@ -42,8 +42,19 @@ private:
 	FTimerHandle FireRateTimerHandle;
 
 	UPROPERTY(EditAnywhere, Category = "Fire Events")
-	float FireRate = 2.f;
+	float FireRateMin = 2.f;
+
+	UPROPERTY(EditAnywhere, Category = "Fire Events")
+	float FireRateMax = 3.f;
+
+	float RandomFireRate = 2.5;
 
 	FVector ProjectileSpawnPointLocation;
+
+	UPROPERTY(EditAnywhere, Category = "Fire Events")
+	float RandomHitTargetOffset = 100.f;
+
+	UPROPERTY(EditAnywhere, Category = "Fire Events")
+	bool bUseRandomOffset = false;
 
 };

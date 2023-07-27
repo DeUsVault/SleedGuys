@@ -29,15 +29,11 @@ void USleedAnimInstance::NativeUpdateAnimation(float DeltaTime)
 
 	bIsInAir = SleedCharacter->GetCharacterMovement()->IsFalling();
 	JumpState = SleedCharacter->getJumpState();
-
 	bIsAccelerating = SleedCharacter->GetCharacterMovement()->GetCurrentAcceleration().Size() > 0.f ? true : false;
-
 	bWeaponEquipped = SleedCharacter->IsWeaponEquipped();
-
 	CharStunState = SleedCharacter->GetCharacterStunState();
-
-	bIsRoping = SleedCharacter->bIsRoping;
-
-	bCelebrates = SleedCharacter->bIsCelebrating;
+	bSliding = SleedCharacter->GetIsSliding();
+	bCelebrates = SleedCharacter->IsCelebrating();
+	bElimmed = SleedCharacter->IsElimmed();
 }
 

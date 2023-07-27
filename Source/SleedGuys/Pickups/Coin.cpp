@@ -3,11 +3,15 @@
 
 #include "Coin.h"
 #include "SleedGuys/Character/SleedCharacter.h"
+#include "NiagaraComponent.h"
 
 ACoin::ACoin()
 {
 	PrimaryActorTick.bCanEverTick = true;
 	bReplicates = true;
+
+	CoinVisual = CreateDefaultSubobject<UNiagaraComponent>(TEXT("Niagara Effect"));
+	CoinVisual->SetupAttachment(RootComponent);
 }
 
 void ACoin::BeginPlay()

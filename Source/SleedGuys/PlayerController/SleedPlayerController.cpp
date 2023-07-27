@@ -5,6 +5,7 @@
 #include "SleedGuys/HUD/SleedHUD.h"
 #include "SleedGuys/HUD/CharacterOverlay.h"
 #include "SleedGuys/HUD/ButtonPresser.h"
+#include "SleedGuys/HUD/GameMenu.h"
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
 #include "Components/Button.h"
@@ -97,6 +98,37 @@ void ASleedPlayerController::SetHUDStunButtons(int32 num)
 			break;
 		default:
 			break;
+		}
+	}
+}
+
+void ASleedPlayerController::SetGameMenuWidget()
+{
+	SleedHUD = SleedHUD == nullptr ? Cast<ASleedHUD>(GetHUD()) : SleedHUD;
+
+	if (SleedHUD)
+	{
+		auto Widget = SleedHUD->HandleGameWidget();
+
+		if(Widget)
+		{
+			// disable input/movement and stuff
+			FInputModeUIOnly InputModeData;
+			InputModeData.SetWidgetToFocus(Widget->TakeWidget());
+			InputModeData.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+
+			SetInputMode(InputModeData);
+			this->bShowMouseCursor = true;
+
+			SetPause(true); // works on singleplayer only
+		}
+		else
+		{
+			// reset input/movement and stuff back to normal
+			SetInputMode(FInputModeGameOnly());
+			this->bShowMouseCursor = false;
+
+			SetPause(false); // works on singleplayer only
 		}
 	}
 }

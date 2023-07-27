@@ -8,6 +8,7 @@
 
 class USphereComponent;
 class UProjectileMovementComponent;
+class UNiagaraSystem;
 
 UCLASS()
 class SLEEDGUYS_API AProjectile : public AActor
@@ -31,11 +32,24 @@ public:
 		const FHitResult& SweepResult
 	);
 
+	virtual void Destroyed() override;
+
 protected:
 	virtual void BeginPlay() override;
 
 	UPROPERTY(EditAnywhere, Category = "Combat")
 	USphereComponent* OverlapSphere;
+
+	UPROPERTY(EditAnywhere)
+	UNiagaraSystem* CollisionEffect = nullptr;
+
+	UPROPERTY(EditAnywhere)
+	UNiagaraSystem* ContinuousEffect = nullptr;
+
+	UPROPERTY(EditAnywhere)
+	UNiagaraSystem* DestructionEffect = nullptr;
+
+	void playNiagaraEffect(UNiagaraSystem* Effect);
 
 private:	
 	UPROPERTY(EditDefaultsOnly, Category = "Combat")

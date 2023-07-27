@@ -6,18 +6,4 @@
 void AObstacleRotator::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-	if (bAllowRotation)
-	{
-		RotateActor(DeltaTime);
-	}
-}
-
-void AObstacleRotator::RotateActor(float DeltaTime)
-{
-	FRotator Rotation = RootComponent->GetRelativeRotation();
-
-	Rotation.Yaw += RotationSpeed * DeltaTime; // Rotate around X-axis
-
-	RootComponent->SetRelativeRotation(Rotation);
 }

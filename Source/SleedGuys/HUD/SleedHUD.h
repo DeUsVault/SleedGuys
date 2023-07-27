@@ -9,6 +9,7 @@
 class UUserWidget;
 class UCharacterOverlay;
 class UButtonPresser;
+class UGameMenu;
 
 /**
  * 
@@ -24,15 +25,21 @@ public:
 
 	UCharacterOverlay* CharacterOverlay;
 
-	//
 	// custom widget for when character is stunned - press button 'X' times to unstun
-	//
 	UPROPERTY(EditAnywhere, Category = "Custom Widgets")
 	TSubclassOf<UButtonPresser> ButtonPresserClass;
 
 	UButtonPresser* ButtonPresser;
 
 	void HandleStunWidgetHUD(bool bCreate);
+
+	// custom widget for when character is stunned - press button 'X' times to unstun
+	UPROPERTY(EditAnywhere, Category = "Custom Widgets")
+	TSubclassOf<UGameMenu> GameMenuWidgetClass;
+
+	UGameMenu* GameMenu;
+
+	UGameMenu* HandleGameWidget();
 protected:
 	virtual void BeginPlay() override;
 	void AddCharacterOverlay();

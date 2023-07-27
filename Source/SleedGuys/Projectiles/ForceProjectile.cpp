@@ -19,14 +19,13 @@ void AForceProjectile::BeginPlay()
 
 void AForceProjectile::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {	
-	if (IsPendingKill()) return;
+	if (!IsValid(this)) return;
 
 	float Speed = this->GetVelocity().Size();
 	if (Speed <= MinVelocityOverlapTrigger)
 	{
 		// disable overlap events if speed is too low
-		OverlapSphere->OnComponentBeginOverlap.RemoveDynamic(this, &AProjectile::OnSphereOverlap);
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::SanitizeFloat(Speed));
+		OverlapSphere->OnComponentBeginOverlap.RemoveDynamic(this, &AForceProjectile::OnSphereOverlap);
 		return;
 	}
 
@@ -41,24 +40,31 @@ void AForceProjectile::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent,
 
 			FVector LaunchPower = FVector(forceDirection.X * ForcePower, forceDirection.Y * ForcePower, 0.f);
 
+			// disable overlap events, we want the projectile to interact only one time
+			OverlapSphere->OnComponentBeginOverlap.RemoveDynamic(this, &AForceProjectile::OnSphereOverlap);
+
 			HittedCharacter->ChangeAirFrictionAndLunch(LaunchPower);
 
-			// disable overlap events, we want the projectile to interact only one time
-			OverlapSphere->OnComponentBeginOverlap.RemoveDynamic(this, &AProjectile::OnSphereOverlap);
+			playNiagaraEffect(CollisionEffect);
+
+			if (IsValid(this))
+			{
+				GetWorldTimerManager().ClearTimer(DestroyTimerHandle);
+				Destroy();
+			}
 		}
 	}
 }
 
 void AForceProjectile::CheckDestruction()
 {	
-	if (IsPendingKill()) return;
+	if (!IsValid(this)) return;
 
 	DestructionNumChecks++;
 
 	float Speed = this->GetVelocity().Size();
 	if (Speed <= MinVelocityDestroyTrigger || DestructionNumChecks > 1)
-	{
-		GetWorldTimerManager().ClearTimer(DestroyTimerHandle);
+	{	
 		Destroy();
 	}
 }

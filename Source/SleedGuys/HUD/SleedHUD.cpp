@@ -5,6 +5,7 @@
 #include "GameFramework/PlayerController.h"
 #include "CharacterOverlay.h"
 #include "ButtonPresser.h"
+#include "GameMenu.h"
 
 void ASleedHUD::BeginPlay()
 {
@@ -31,11 +32,16 @@ void ASleedHUD::HandleStunWidgetHUD(bool bCreate)
 		if (bCreate)
 		{	
 			if (ButtonPresser)
-			{
+			{	
+				// we need to remove the previous widget if it existed
 				ButtonPresser->RemoveFromViewport();
-			} // we need to remove the previous widget if it existed
+				ButtonPresser = nullptr;
+			} 
 			ButtonPresser = CreateWidget<UButtonPresser>(PlayerController, ButtonPresserClass);
-			ButtonPresser->AddToViewport();
+			if (ButtonPresser)
+			{
+				ButtonPresser->AddToViewport();
+			}
 		}
 		else
 		{	
@@ -45,5 +51,35 @@ void ASleedHUD::HandleStunWidgetHUD(bool bCreate)
 			}
 		}
 	}
+}
+
+UGameMenu* ASleedHUD::HandleGameWidget()
+{	
+	APlayerController* PlayerController = GetOwningPlayerController();
+	if (!PlayerController)
+	{
+		return nullptr;
+	}
+
+	if (GameMenu && GameMenu->IsInViewport())
+	{
+		// The widget is already in the viewport, so destroy it
+		GameMenu->RemoveFromViewport();
+		GameMenu = nullptr; // Set the pointer to nullptr since the widget is destroyed
+
+		return GameMenu;
+	}
+	else
+	{
+		// The widget is not in the viewport, so create and add it
+		GameMenu = CreateWidget<UGameMenu>(PlayerController, GameMenuWidgetClass);
+		if (GameMenu)
+		{
+			GameMenu->AddToViewport();
+			return GameMenu;
+		}
+	}
+
+	return nullptr;
 }
 

@@ -6,7 +6,6 @@
 USleedCableComponent::USleedCableComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
-	SetIsReplicated(true);
 }
 
 void USleedCableComponent::BeginPlay()

@@ -19,6 +19,7 @@ public:
 	friend class ASleedCharacter;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	void AddStamina(float StaminaRegenAmount, float StaminaRegenTime, bool bRegenOverTime);
+	void AddHealth(float HealthRegenAmount);
 
 protected:
 	virtual void BeginPlay() override;

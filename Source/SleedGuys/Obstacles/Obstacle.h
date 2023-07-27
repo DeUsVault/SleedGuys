@@ -17,6 +17,9 @@ public:
 
 	virtual void BindOverlap();
 
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastUpdateLocation(FVector Location);
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -25,8 +28,12 @@ protected:
 
 private:
 	FVector StartLocation;
+
 	FVector CurrentLocation;
 
+	//
+	// move object logic
+	//
 	UPROPERTY(EditAnywhere, Category = "Movement")
 	bool bAllowMovement = true;
 
@@ -46,6 +53,32 @@ private:
 	bool bMoveOnZ = true;
 
 	void MoveOnAxis(float DeltaTime);
+
+	//
+	// rotate object logic
+	//
+	UPROPERTY(EditAnywhere, Category = "Custom Rotation")
+	bool bAllowRotation = false;
+
+	UPROPERTY(EditAnywhere, Category = "Custom Rotation")
+	float RotationSpeed = 200.f;
+
+	UPROPERTY(EditAnywhere, Category = "Custom Rotation")
+	bool bReverseRotation = false;
+
+	UPROPERTY(EditAnywhere, Category = "Custom Rotation")
+	double RotationMaxDegrees = 80.f;
+
+	UPROPERTY(EditAnywhere, Category = "Custom Rotation")
+	bool bRotateOnX = false;
+
+	UPROPERTY(EditAnywhere, Category = "Custom Rotation")
+	bool bRotateOnY = false;
+
+	UPROPERTY(EditAnywhere, Category = "Custom Rotation")
+	bool bRotateOnZ = true;
+
+	void RotateActor(float DeltaTime);
 
 public:	
 

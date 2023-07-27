@@ -13,5 +13,9 @@ UCLASS()
 class SLEEDGUYS_API ASleedGameMode : public AGameMode
 {
 	GENERATED_BODY()
+
+public:
+	virtual void PlayerEliminated(class ASleedCharacter* ElimmedCharacter, class ASleedPlayerController* VictimController);
+	virtual void RequestRespawn(ACharacter* ElimmedCharacter, AController* ElimmedController);
 	
 };

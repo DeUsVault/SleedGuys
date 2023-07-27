@@ -12,6 +12,11 @@
 #include "SleedGuys/SleederComponents/BuffComponent.h"
 #include "SleedGuys/RopeSwing/SleedCableComponent.h"
 #include "SleedGuys/PlayerController/SleedPlayerController.h"
+#include "SleedGuys/GameMode/SleedGameMode.h"
+#include "SleedGuys/PlayerStates/SleedPlayerState.h"
+
+#include "NiagaraFunctionLibrary.h"
+#include "Components/CapsuleComponent.h"
 
 #include "Components/InputComponent.h"
 #include "EnhancedInputComponent.h"
@@ -27,6 +32,8 @@ ASleedCharacter::ASleedCharacter()
 
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	GetCharacterMovement()->RotationRate = FRotator(0.f, 400.f, 0.f);
+
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
 
 	GetMesh()->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
 	GetMesh()->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
@@ -66,6 +73,11 @@ void ASleedCharacter::BeginPlay()
 			Subsystem->AddMappingContext(SleedContext, 0);
 		}
 
+		if (HasAuthority())
+		{
+			OnTakeAnyDamage.AddDynamic(this, &ASleedCharacter::ReceiveDamage);
+		}
+
 		SleedPlayerController->SetHUDHealth(Health, MaxHealth);
 		SleedPlayerController->SetHUDStamina(Stamina, MaxStamina);
 	}
@@ -97,9 +109,14 @@ void ASleedCharacter::Tick(float DeltaTime)
 		MovementComp->SafeMoveUpdatedComponent(FVector(0.f, 0.f, -0.01f), GetActorRotation(), true, OutHit);
 	}
 
-	if (bIsRoping)
-	{	
+	if (JumpState == EJumpState::EJS_Swinging)
+	{
 		RopeSwing(DeltaTime);
+	}
+
+	if (bIsSliding)
+	{
+		Slide();
 	}
 
 	/* way to check timerhandle
@@ -122,6 +139,7 @@ void ASleedCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 		EnhancedInputComponent->BindAction(RopeAction, ETriggerEvent::Triggered, this, &ASleedCharacter::RopeButtonPressed);
 		EnhancedInputComponent->BindAction(XButtonAction, ETriggerEvent::Triggered, this, &ASleedCharacter::XButtonPressed);
 		EnhancedInputComponent->BindAction(Celebration, ETriggerEvent::Triggered, this, &ASleedCharacter::Celebrate);
+		EnhancedInputComponent->BindAction(GameMenuCall, ETriggerEvent::Triggered, this, &ASleedCharacter::GameMenu);
 	}
 }
 
@@ -133,12 +151,11 @@ void ASleedCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutL
 	DOREPLIFETIME(ASleedCharacter, JumpState);
 	DOREPLIFETIME(ASleedCharacter, Health);
 	DOREPLIFETIME(ASleedCharacter, Stamina);
-	DOREPLIFETIME(ASleedCharacter, Gold);
 	DOREPLIFETIME(ASleedCharacter, CharacterStunState);
 	DOREPLIFETIME(ASleedCharacter, OverlappingRopeSwing);
-	DOREPLIFETIME(ASleedCharacter, bIsRoping);
 	DOREPLIFETIME(ASleedCharacter, Cable); 
 	DOREPLIFETIME(ASleedCharacter, bIsCelebrating);
+	DOREPLIFETIME(ASleedCharacter, bIsSliding);
 }
 
 void ASleedCharacter::PostInitializeComponents()
@@ -154,9 +171,40 @@ void ASleedCharacter::PostInitializeComponents()
 	}
 }
 
+void ASleedCharacter::ReceiveDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatorController, AActor* DamageCauser)
+{
+	Health = FMath::Clamp(Health - Damage, 0.f, MaxHealth);
+	UpdateHUDHealth();
+
+	if(!IsAlive())
+	{
+		ASleedGameMode* SleedGameMode = GetWorld()->GetAuthGameMode<ASleedGameMode>();
+		if (SleedGameMode && Controller)
+		{	
+			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("sleed game mode"));
+			SleedPlayerController = SleedPlayerController == nullptr ? Cast<ASleedPlayerController>(Controller) : SleedPlayerController;
+			SleedGameMode->PlayerEliminated(this, SleedPlayerController);
+		}
+	}
+}
+
 void ASleedCharacter::OnRep_Health()
 {
+	UpdateHUDHealth();
+}
 
+void ASleedCharacter::UpdateHUDHealth()
+{
+	SleedPlayerController = SleedPlayerController == nullptr ? Cast<ASleedPlayerController>(Controller) : SleedPlayerController;
+	if (SleedPlayerController)
+	{
+		SleedPlayerController->SetHUDHealth(Health, MaxHealth);
+	}
+}
+
+bool ASleedCharacter::IsAlive()
+{
+	return (Health > 0.f);
 }
 
 void ASleedCharacter::OnRep_Stamina()
@@ -209,16 +257,40 @@ bool ASleedCharacter::IsWeaponEquipped()
 void ASleedCharacter::Move(const FInputActionValue& Value)
 {
 	if (IsStunned()) return;
-
+	
 	const FVector2D MovementVector = Value.Get<FVector2D>();
 
 	const FRotator Rotation = Controller->GetControlRotation();
 	const FRotator YawRotation(0.f, Rotation.Yaw, 0.f);
 
 	const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
-	AddMovementInput(ForwardDirection, MovementVector.Y);
 	const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
-	AddMovementInput(RightDirection, MovementVector.X);
+
+	if (!bIsSliding)
+	{
+		AddMovementInput(ForwardDirection, MovementVector.Y);
+		AddMovementInput(RightDirection, MovementVector.X);
+	}
+	else
+	{	
+		if (MovementVector.Y > 0.f)
+		{
+			ForwardSlide = FMath::Clamp(ForwardSlide + 0.05f, MinSlidePower, MaxSlidePower);
+		}
+		else if (MovementVector.Y < 0.f)
+		{
+			ForwardSlide = FMath::Clamp(ForwardSlide - 0.05f, MinSlidePower, MaxSlidePower);
+		}
+
+		if (MovementVector.X > 0.f)
+		{
+			RightSlide = FMath::Clamp(RightSlide + 0.05f, MinSlidePower, MaxSlidePower);
+		}
+		else if (MovementVector.X < 0.f)
+		{
+			RightSlide = FMath::Clamp(RightSlide - 0.05f, MinSlidePower, MaxSlidePower);
+		}
+	}
 }
 
 void ASleedCharacter::Look(const FInputActionValue& Value)
@@ -235,19 +307,15 @@ void ASleedCharacter::Jump()
 {	
 	if (IsStunned()) return;
 
-	if (bIsRoping)
-	{	
-		ServerBreakCable();
-		return;
-	}
-
 	// jump is called both on server and client - reasoning not found yet!
-	if (this->JumpCurrentCount == 0)
+	if (JumpState == EJumpState::EJS_NoJump)
 	{
 		MovementComp->JumpZVelocity = firstJumpHeight;
 		JumpState = EJumpState::EJS_FirstJump;
+
+		NiagaraJumpEffect(FirstJumpEffect);
 	}
-	else if (this->JumpCurrentCount == 1)
+	else if (JumpState == EJumpState::EJS_FirstJump)
 	{
 		if (Stamina < JumpCost) return;
 
@@ -256,9 +324,33 @@ void ASleedCharacter::Jump()
 
 		Stamina = FMath::Clamp(Stamina - JumpCost, 0.f, MaxStamina);
 		UpdateHUDStamina();
+
+		NiagaraJumpEffect(SecondaryJumpEffect);
+	}
+	else if (JumpState == EJumpState::EJS_Swinging)
+	{	
+		ServerBreakCable();
+		JumpState = EJumpState::EJS_FirstJump;
+		MovementComp->JumpZVelocity = swingJumpHeight;
+	}
+	else if(this->JumpCurrentCount > 1)
+	{
+		return; // we can jump only two times pressing the button, but we want our JumpCurrentCount to not be limited to 2 only incase of 'special' launches etc
 	}
 
 	Super::Jump();
+}
+
+void ASleedCharacter::NiagaraJumpEffect(UNiagaraSystem* JumpEffect)
+{	
+	if (JumpEffect)
+	{
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+			this,
+			JumpEffect,
+			GetMesh()->GetSocketLocation(FName("JumpEffectSocket"))
+		);
+	}
 }
 
 void ASleedCharacter::Landed(const FHitResult& Hit)
@@ -338,41 +430,14 @@ void ASleedCharacter::ServerSprint_Implementation(float Speed, bool breduceStami
 
 void ASleedCharacter::AddGold(int32 AmountOfGold)
 {
-	Gold += AmountOfGold;
-	UpdateHUDGold(); // coin pickup happens only on the server
-	if (HasAuthority())
-	{
-		if (GEngine)
-		{
-			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("authority"));
-			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::FromInt(AmountOfGold));
-		}
-	}
-	else 
-	{
-		if (GEngine)
-		{
-			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Blue, TEXT("noobie"));
-			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Blue, FString::FromInt(AmountOfGold));
-		}
-	}
-}
-
-void ASleedCharacter::OnRep_Gold()
-{
-	if (GEngine)
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, TEXT("replicatingggg"));
-	}
-	UpdateHUDGold();
-}
-
-void ASleedCharacter::UpdateHUDGold()
-{
 	SleedPlayerController = SleedPlayerController == nullptr ? Cast<ASleedPlayerController>(Controller) : SleedPlayerController;
 	if (SleedPlayerController)
 	{
-		SleedPlayerController->SetHUDGold(Gold);
+		SleedPlayerState = SleedPlayerState == nullptr ? Cast<ASleedPlayerState>(SleedPlayerController->PlayerState) : SleedPlayerState;
+		if (SleedPlayerState)
+		{
+			SleedPlayerState->AddGold(AmountOfGold);
+		}
 	}
 }
 
@@ -483,8 +548,12 @@ void ASleedCharacter::ServerChangeStunState_Implementation(ECharacterStunState S
 }
 
 void ASleedCharacter::StunWidgetVisibility(ECharacterStunState StunState)
-{
-	SleedPlayerController = SleedPlayerController == nullptr ? Cast<ASleedPlayerController>(Controller) : SleedPlayerController;
+{	
+	if(Controller)
+	{
+		SleedPlayerController = SleedPlayerController == nullptr ? Cast<ASleedPlayerController>(Controller) : SleedPlayerController;
+	}
+
 	if (SleedPlayerController == nullptr) return;
 	
 	if (CharacterStunState == ECharacterStunState::ECS_Init)
@@ -505,7 +574,7 @@ void ASleedCharacter::RopeButtonPressed()
 {	
 	if (IsStunned()) return;
 
-	if (!bIsRoping)
+	if (JumpState != EJumpState::EJS_Swinging)
 	{	
 		ServerCreateCable();
 	}
@@ -523,26 +592,10 @@ void ASleedCharacter::ServerBreakCable_Implementation()
 }
 
 void ASleedCharacter::MulticastUpdateCable_Implementation(bool bBreak)
-{
+{	
 	if (bBreak)
 	{
-		if (Cable)
-		{
-			if (Cable->IsActive())
-			{
-				Cable->SetAttachEndToComponent(GetMesh(), NAME_None);
-				Cable->SetVisibility(false);
-				Cable->SetActive(false);
-			}
-
-			bIsRoping = false;
-			RopeSwingLocation = FVector::ZeroVector;
-		}
-
-		if (OverlappingRopeSwing)
-		{
-			OverlappingRopeSwing->ShowPickupWidget(true);
-		}
+		BreakSwing();
 	}
 	else
 	{
@@ -569,7 +622,7 @@ void ASleedCharacter::MulticastUpdateCable_Implementation(bool bBreak)
 				OverlappingRopeSwing->ShowPickupWidget(false);
 			}
 
-			bIsRoping = true;
+			JumpState = EJumpState::EJS_Swinging;
 		}
 	}
 }
@@ -602,8 +655,23 @@ void ASleedCharacter::OnRep_OverlappingRopeSwing(ARopeSwing* LastRopeSwing)
 	}
 }
 
+void ASleedCharacter::BreakSwing()
+{
+	if (Cable)
+	{
+		if (Cable->IsActive())
+		{
+			Cable->SetAttachEndToComponent(GetMesh(), NAME_None);
+			Cable->SetVisibility(false);
+			Cable->SetActive(false);
+		}
+
+		RopeSwingLocation = FVector::ZeroVector;
+	}
+}
+
 void ASleedCharacter::RopeSwing(float DeltaTime)
-{	
+{
 	if (RopeSwingLocation.IsNearlyZero()) return;
 
 	// character velocity
@@ -624,11 +692,11 @@ void ASleedCharacter::RopeSwing(float DeltaTime)
 		In this case, multiplying the dot product by - 2 will result in a negative force, which essentially means the force will act in the opposite direction
 		of the character's velocity. This can create a decelerating effect, slowing down the character's movement and potentially facilitating a swinging motion.
 
-		When the dot product is negative, it means the character is moving in the opposite direction of the rope swing.In this case, 
-		multiplying the dot product by - 2 will result in a positive force, which means the force will act in the same direction as the character's velocity. 
-		This can provide a slight additional push in the same direction as the character's movement, potentially aiding the swinging motion. 
+		When the dot product is negative, it means the character is moving in the opposite direction of the rope swing.In this case,
+		multiplying the dot product by - 2 will result in a positive force, which means the force will act in the same direction as the character's velocity.
+		This can provide a slight additional push in the same direction as the character's movement, potentially aiding the swinging motion.
 	*/
-	
+
 	FVector Force = DistanceNormalized * DotProduct * (-2.f);
 
 	// Apply the force to the character's rigid body
@@ -663,8 +731,86 @@ void ASleedCharacter::AddSwingRotation(FVector& Distance, float DeltaTime)
 	SetActorRotation(NewRotation);
 }
 
+void ASleedCharacter::Slide()
+{	
+	if (Controller)
+	{	
+		/*
+		FRotator Rotation = Controller->GetControlRotation();
+		FRotator YawRotation(0.f, Rotation.Yaw, 0.f);
+		FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+		AddMovementInput(ForwardDirection, ForwardSlide);
+		FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+		AddMovementInput(RightDirection, RightSlide);
+		*/
+		
+		FVector ForwardVector = GetActorForwardVector();
+		// Convert the forward vector to a rotation
+		FRotator ForwardRotation = FRotationMatrix::MakeFromX(ForwardVector).Rotator();
+		// Calculate the right vector based on the forward rotation
+		FVector RightVector = ForwardRotation.RotateVector(FVector::RightVector);
+		// Add movement input using the forward and right vectors
+		AddMovementInput(ForwardVector, ForwardSlide);
+		AddMovementInput(RightVector, RightSlide);
+		
+	}
+}
+
+void ASleedCharacter::setIsSliding(bool bSlides)
+{
+	bIsSliding = bSlides;
+	
+	if(bIsSliding)
+	{	
+		if (MovementComp)
+		{	
+			bUseControllerRotationYaw = true;
+			MovementComp->bOrientRotationToMovement = false;
+			MovementComp->RotationRate = FRotator(0.f, 100.f, 0.f);
+		}
+	}
+	else
+	{	
+		if (MovementComp)
+		{	
+			bUseControllerRotationYaw = false;
+			MovementComp->bOrientRotationToMovement = true;
+			MovementComp->RotationRate = FRotator(0.f, 400.f, 0.f);
+		}
+	}
+	
+	ForwardSlide = InitialSlidePower;
+	RightSlide = InitialSlidePower / 2;
+}
+
+void ASleedCharacter::OnRep_IsSliding()
+{	
+	if (bIsSliding)
+	{
+		if (MovementComp)
+		{	
+			bUseControllerRotationYaw = true;
+			MovementComp->bOrientRotationToMovement = false;
+			MovementComp->RotationRate = FRotator(0.f, 100.f, 0.f);
+		}
+	}
+	else
+	{
+		if (MovementComp)
+		{	
+			bUseControllerRotationYaw = false;
+			MovementComp->bOrientRotationToMovement = true;
+			MovementComp->RotationRate = FRotator(0.f, 400.f, 0.f);
+		}
+	}
+
+	ForwardSlide = InitialSlidePower;
+	RightSlide = InitialSlidePower / 2;
+}
+
 void ASleedCharacter::Celebrate()
 {
+	/*
 	if (bIsCelebrating)
 	{
 		bIsCelebrating = false;
@@ -672,5 +818,67 @@ void ASleedCharacter::Celebrate()
 	else
 	{
 		bIsCelebrating = true;
+	}
+	*/
+
+	ElimTimerFinished();
+}
+
+void ASleedCharacter::GameMenu()
+{	
+	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Blue, TEXT("pressed P"));
+	SleedPlayerController = SleedPlayerController == nullptr ? Cast<ASleedPlayerController>(Controller) : SleedPlayerController;
+	if (SleedPlayerController)
+	{
+		SleedPlayerController->SetGameMenuWidget();
+	}
+}
+
+//
+// Death
+//
+void ASleedCharacter::Elim()
+{
+	MulticastElim();
+	GetWorldTimerManager().SetTimer(
+		ElimTimer,
+		this,
+		&ASleedCharacter::ElimTimerFinished,
+		ElimDelay
+	);
+}
+
+void ASleedCharacter::MulticastElim_Implementation()
+{
+	bElimmed = true;
+	PlayElimMontage();
+
+	// Disable character movement
+	GetCharacterMovement()->DisableMovement();
+	GetCharacterMovement()->StopMovementImmediately();
+	if (SleedPlayerController)
+	{
+		DisableInput(SleedPlayerController);
+	}
+	// Disable collision
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+}
+
+void ASleedCharacter::PlayElimMontage()
+{
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance && ElimMontage)
+	{
+		AnimInstance->Montage_Play(ElimMontage);
+	}
+}
+
+void ASleedCharacter::ElimTimerFinished()
+{
+	ASleedGameMode* SleedGameMode = GetWorld()->GetAuthGameMode<ASleedGameMode>();
+	if (SleedGameMode)
+	{
+		SleedGameMode->RequestRespawn(this, Controller);
 	}
 }

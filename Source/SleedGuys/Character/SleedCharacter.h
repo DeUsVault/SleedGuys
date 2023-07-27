@@ -16,8 +16,10 @@ class ABaseWeapon;
 class UCombatComp;
 class UBuffComponent;
 class ASleedPlayerController;
+class ASleedPlayerState;
 class ARopeSwing;
 class USleedCableComponent;
+class UNiagaraSystem;
 
 UCLASS()
 class SLEEDGUYS_API ASleedCharacter : public ACharacter
@@ -44,9 +46,13 @@ public:
 	void XButtonPressed();
 	void RopeButtonPressed();
 	void Celebrate();
+	void GameMenu();
 
 	// Stamina Functions
 	void UpdateHUDStamina();
+
+	// Health Functions
+	void UpdateHUDHealth();
 
 	// MovementMode change functions
 	void ChangeAirFrictionAndLunch(FVector LaunchPower);
@@ -60,6 +66,20 @@ public:
 
 	// Stun mechanic functions
 	void ChangeStunState(ECharacterStunState StunState);
+
+	// rope swing
+	void SetOverlappingRopeSwing(ARopeSwing* RopeSwing);
+
+	// Slide Functions
+	void setIsSliding(bool bSlides);
+
+	// Death logic
+	void Elim();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastElim();
+
+	void PlayElimMontage();
 
 protected:
 	virtual void BeginPlay() override;
@@ -91,9 +111,22 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Input")
 	UInputAction* Celebration;
 
+	UPROPERTY(EditAnywhere, Category = "Input")
+	UInputAction* GameMenuCall;
+
+	// Damage - Health
+	UFUNCTION()
+	void ReceiveDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, class AController* InstigatorController, AActor* DamageCauser);
+
+	UPROPERTY(EditAnywhere, Category = Combat)
+	UAnimMontage* ElimMontage;
+
 private:
 	// Controller
 	ASleedPlayerController* SleedPlayerController;
+
+	// Player State
+	ASleedPlayerState* SleedPlayerState;
 
 	// Camera
 	UPROPERTY(EditAnywhere, Category = Camera)
@@ -116,10 +149,21 @@ private:
 	float secondJumpHeight = 600.f;
 
 	UPROPERTY(EditAnywhere, Category = "Player Stats")
+	float swingJumpHeight = 1000.f;
+
+	UPROPERTY(EditAnywhere, Category = "Player Stats")
 	float JumpCost = 20.f;
 
 	UPROPERTY(Replicated)
 	EJumpState JumpState = EJumpState::EJS_NoJump;
+
+	UPROPERTY(EditAnywhere)
+	UNiagaraSystem* FirstJumpEffect = nullptr;
+
+	UPROPERTY(EditAnywhere)
+	UNiagaraSystem* SecondaryJumpEffect = nullptr;
+
+	void NiagaraJumpEffect(UNiagaraSystem* JumpEffect);
 
 	// Weapon Logic
 	UPROPERTY(Replicated, ReplicatedUsing = OnRep_OverlappingWeapon)
@@ -151,6 +195,8 @@ private:
 	UFUNCTION()
 	void OnRep_Health();
 
+	bool IsAlive();
+
 	UPROPERTY(EditAnywhere, Category = "Player Stats")
 	float MaxStamina = 100.f;
 
@@ -159,14 +205,6 @@ private:
 
 	UFUNCTION()
 	void OnRep_Stamina();
-
-	UPROPERTY(ReplicatedUsing = OnRep_Gold, VisibleAnywhere, Category = "Player Stats")
-	int32 Gold;
-
-	UFUNCTION()
-	void OnRep_Gold();
-
-	void UpdateHUDGold();
 
 	// Sprint Functions
 	UPROPERTY(EditAnywhere, Category = "Player Stats")
@@ -211,21 +249,9 @@ private:
 	void StunWidgetVisibility(ECharacterStunState StunState = ECharacterStunState::ECS_Default);
 	void UpdateStunButtonHUD(int32 num);
 
-public:
-	// Place for Getters/Setters only
-	void SetOverlappingWeapon(ABaseWeapon* Weapon);
-	bool IsWeaponEquipped();
-	FORCEINLINE EJumpState getJumpState() { return this->JumpState; }
-	FORCEINLINE UBuffComponent* GetBuff() const { return this->Buff; }
-	FORCEINLINE float GetStamina() const { return Stamina; }
-	FORCEINLINE float GetMaxStamina() const { return MaxStamina; }
-	FORCEINLINE void SetStamina(float Amount) { Stamina = Amount; }
-	void AddGold(int32 AmountOfGold);
-	FORCEINLINE int32 GetGold() const { return this->Gold; }
-	FORCEINLINE ECharacterStunState GetCharacterStunState() const { return this->CharacterStunState; }
-
-	// Rope Logic
-	void SetOverlappingRopeSwing(ARopeSwing* RopeSwing);
+	//
+	// Rope Swing
+	//
 	UPROPERTY(Replicated, ReplicatedUsing = OnRep_OverlappingRopeSwing)
 	ARopeSwing* OverlappingRopeSwing;
 
@@ -247,10 +273,56 @@ public:
 
 	FVector RopeSwingLocation;
 
-	UPROPERTY(Replicated)
-	bool bIsRoping = false;
+	void BreakSwing();
 
 	UPROPERTY(Replicated)
 	bool bIsCelebrating = false;
 
+	// slide
+	void Slide();
+	float ForwardSlide = 0.f;
+	float RightSlide = 0.f;
+
+	UPROPERTY(EditAnywhere, Category = "Sliding")
+	float MinSlidePower = -3.f;
+
+	UPROPERTY(EditAnywhere, Category = "Sliding")
+	float MaxSlidePower = 3.f;
+
+	UPROPERTY(EditAnywhere, Category = "Sliding")
+	float InitialSlidePower = 1.f;
+
+	UPROPERTY(Replicated, ReplicatedUsing = OnRep_IsSliding)
+	bool bIsSliding = false;
+
+	UFUNCTION()
+	void OnRep_IsSliding();
+
+	// elimination
+	bool bElimmed = false;
+
+	FTimerHandle ElimTimer;
+
+	UPROPERTY(EditDefaultsOnly)
+	float ElimDelay = 3.f;
+
+	void ElimTimerFinished();
+
+public:
+	// Place for Getters/Setters only
+	void SetOverlappingWeapon(ABaseWeapon* Weapon);
+	bool IsWeaponEquipped();
+	FORCEINLINE EJumpState getJumpState() { return this->JumpState; }
+	FORCEINLINE UBuffComponent* GetBuff() const { return this->Buff; }
+	FORCEINLINE float GetStamina() const { return Stamina; }
+	FORCEINLINE float GetMaxStamina() const { return MaxStamina; }
+	FORCEINLINE void SetStamina(float Amount) { Stamina = Amount; }
+	FORCEINLINE float GetHealth() const { return Health; }
+	FORCEINLINE float GetMaxHealth() const { return MaxHealth; }
+	FORCEINLINE void SetHealth(float Amount) { Health = Amount; }
+	void AddGold(int32 AmountOfGold);
+	FORCEINLINE ECharacterStunState GetCharacterStunState() const { return this->CharacterStunState; }
+	FORCEINLINE bool IsCelebrating() const { return this->bIsCelebrating; }
+	FORCEINLINE bool GetIsSliding() const { return this->bIsSliding; }
+	FORCEINLINE bool IsElimmed() const { return bElimmed; }
 };

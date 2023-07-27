@@ -20,32 +20,35 @@ void AStunProjectile::BeginPlay()
 
 void AStunProjectile::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {	
-	if (IsPendingKill()) return;
+	if (!IsValid(this)) return;
 
 	if (OtherActor)
 	{
 		ASleedCharacter* HittedCharacter = Cast<ASleedCharacter>(OtherActor);
 		if (HittedCharacter)
 		{	
-			if (HasAuthority())
-			{
-				GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("authority overlap"));
-			}
+			OverlapSphere->OnComponentBeginOverlap.RemoveDynamic(this, &AStunProjectile::OnSphereOverlap);
 			HittedCharacter->ChangeStunState(ECharacterStunState::ECS_Xstun);
-			Destroy();
+
+			playNiagaraEffect(CollisionEffect);
+
+			if (IsValid(this))
+			{	
+				GetWorldTimerManager().ClearTimer(DestroyTimerHandle);
+				Destroy();
+			}
 		}
 	}
 }
 
 void AStunProjectile::CheckDestruction()
 {	
-	if (IsPendingKill()) return;
+	if (!IsValid(this)) return;
 
 	DestructionNumChecks++;
 
 	if (DestructionNumChecks > 1)
-	{
-		GetWorldTimerManager().ClearTimer(DestroyTimerHandle);
+	{	
 		Destroy();
 	}
 }

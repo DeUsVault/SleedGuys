@@ -6,6 +6,8 @@
 #include "Pickup.h"
 #include "Coin.generated.h"
 
+class UNiagaraComponent;
+
 UCLASS()
 class SLEEDGUYS_API ACoin : public APickup
 {
@@ -29,6 +31,9 @@ protected:
 private:
 	UPROPERTY(EditAnywhere, Category = "Coin Properties")
 	int32 CoinValue;
+
+	UPROPERTY(EditAnywhere)
+	UNiagaraComponent* CoinVisual;
 
 public:	
 

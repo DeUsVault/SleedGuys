@@ -27,7 +27,8 @@ void ATurret::BeginPlay()
 
 	ProjectileSpawnPointLocation = ProjectileSpawnPoint->GetComponentLocation();
 
-	GetWorldTimerManager().SetTimer(FireRateTimerHandle, this, &ATurret::Fire, FireRate, true);
+	RandomFireRate = FMath::FRandRange(FireRateMin, FireRateMax);
+	GetWorldTimerManager().SetTimer(FireRateTimerHandle, this, &ATurret::Fire, RandomFireRate, true);
 }
 
 void ATurret::Tick(float DeltaTime)
@@ -37,31 +38,49 @@ void ATurret::Tick(float DeltaTime)
 
 void ATurret::Fire()
 {	
-	if (ProjectileClass)
+	// check if ProjectileClasses array has elements and pick one at random
+	int32 ProjectilesNum = ProjectileClasses.Num();
+	if (ProjectilesNum > 0)
 	{	
-		int32 TargetsNum = PossibleTargets.Num();
-
-		if (TargetsNum > 0)
-		{
-			int32 Selection = FMath::RandRange(0, TargetsNum - 1);
-			if (PossibleTargets[Selection])
+		int32 ProjectileSelection = FMath::RandRange(0, ProjectilesNum - 1);
+		if (ProjectileClasses[ProjectileSelection])
+		{	
+			// check if PossibleTargets array has elements and pick one at random
+			int32 TargetsNum = PossibleTargets.Num();
+			if (TargetsNum > 0)
 			{
-				AActor* Actor = Cast<AActor>(PossibleTargets[Selection]);
-				if (Actor)
+				int32 Selection = FMath::RandRange(0, TargetsNum - 1);
+				if (PossibleTargets[Selection])
 				{
-					// calculate the rotation our projectile should have, by taking into account the target's location/rotation
-					FVector HitTarget = Actor->GetActorLocation();
-					FVector ToTarget = HitTarget - ProjectileSpawnPointLocation;
-					FRotator TargetRotation = ToTarget.Rotation();
-
-					if (ProjectileClass)
+					AActor* Actor = Cast<AActor>(PossibleTargets[Selection]);
+					if (Actor)
 					{
-						AProjectile* Projectile = GetWorld()->SpawnActor<AProjectile>(ProjectileClass, ProjectileSpawnPointLocation, TargetRotation);
-						Projectile->SetOwner(this);
+						FVector HitTarget = Actor->GetActorLocation();
+						if (bUseRandomOffset)
+						{
+							FVector RandomOffsetVector = FVector(
+								FMath::FRandRange(-RandomHitTargetOffset, RandomHitTargetOffset),
+								FMath::FRandRange(-RandomHitTargetOffset, RandomHitTargetOffset),
+								FMath::FRandRange(-RandomHitTargetOffset, RandomHitTargetOffset)
+							);
+							HitTarget += RandomOffsetVector;
+						}
+
+						// calculate the rotation our projectile should have, by taking into account the target's location/rotation
+						FVector ToTarget = HitTarget - ProjectileSpawnPointLocation;
+						FRotator TargetRotation = ToTarget.Rotation();
+
+						if (ProjectileClasses[ProjectileSelection])
+						{
+							AProjectile* Projectile = GetWorld()->SpawnActor<AProjectile>(ProjectileClasses[ProjectileSelection], ProjectileSpawnPointLocation, TargetRotation);
+							Projectile->SetOwner(this);
+						}
 					}
 				}
 			}
 		}
 	}
+
+	RandomFireRate = FMath::FRandRange(FireRateMin, FireRateMax);
 }
 

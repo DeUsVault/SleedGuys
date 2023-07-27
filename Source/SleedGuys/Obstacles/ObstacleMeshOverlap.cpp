@@ -20,13 +20,14 @@ void AObstacleMeshOverlap::BeginPlay()
 
 void AObstacleMeshOverlap::BindOverlap()
 {	
-	Destroy();
-	//ObstacleMesh->OnComponentBeginOverlap.AddDynamic(this, &AObstacleMeshOverlap::OnBoxOverlap);
+	//Destroy();
+	ObstacleMesh->OnComponentBeginOverlap.AddDynamic(this, &AObstacleMeshOverlap::OnBoxOverlap);
+	GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Yellow, TEXT("AObstacleMeshOverlap BindOverlap function"));
 }
 
 void AObstacleMeshOverlap::OnBoxOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Mesh Overlap"));
+	GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Yellow, TEXT("AObstacleMeshOverlap"));
 
 	//Destroy();
 }

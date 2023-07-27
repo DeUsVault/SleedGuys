@@ -55,3 +55,10 @@ void UBuffComponent::AddStamina(float StaminaRegenAmount, float StaminaRegenTime
 	}
 }
 
+void UBuffComponent::AddHealth(float HealthRegenAmount)
+{
+	float HealthNum = FMath::Clamp(Character->GetHealth() + HealthRegenAmount, 0.f, Character->GetMaxHealth());
+	Character->SetHealth(HealthNum);
+	Character->UpdateHUDHealth(); // here it only happens if we have authority because on pickup class we set the overlapping functions to happen on authority only
+}
+
