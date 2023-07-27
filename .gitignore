@@ -3,6 +3,7 @@ DerivedDataCache
 Intermediate
 Saved
 CustomAssets
+Packaged
 .vscode
 .vs
 *.VC.db
