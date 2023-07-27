@@ -17,14 +17,20 @@ class SLEEDGUYS_API ASleedPlayerController : public APlayerController
 	GENERATED_BODY()
 
 public:
+	virtual void Tick(float DeltaTime) override;
+
 	void SetHUDHealth(float Health, float MaxHealth);
 	void SetHUDStamina(float Stamina, float MaxStamina);
 	void SetHUDGold(int32 CoinsNum);
 	void HandleStunWidget(bool bCreate);
 	void SetHUDStunButtons(int32 num);
 	void SetGameMenuWidget();
+	void SetHUDMatchTime(float Time);
+
 protected:
 	virtual void BeginPlay() override;
+
+	void SetHUDTime();
 
 private:
 	ASleedHUD* SleedHUD;

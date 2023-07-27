@@ -32,5 +32,8 @@ public:
 
 	UPROPERTY(meta = (BindWidget))
 	class UTextBlock* CoinText;
+
+	UPROPERTY(meta = (BindWidget))
+	class UTextBlock* MatchTimeText;
 	
 };

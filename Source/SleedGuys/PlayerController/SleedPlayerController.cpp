@@ -9,12 +9,20 @@
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
 #include "Components/Button.h"
+#include "Net/UnrealNetwork.h"
 
 void ASleedPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 
 	SleedHUD = Cast<ASleedHUD>(GetHUD());
+}
+
+void ASleedPlayerController::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	SetHUDTime();
 }
 
 void ASleedPlayerController::SetHUDHealth(float Health, float MaxHealth)
@@ -130,6 +138,28 @@ void ASleedPlayerController::SetGameMenuWidget()
 
 			SetPause(false); // works on singleplayer only
 		}
+	}
+}
+
+void ASleedPlayerController::SetHUDTime()
+{
+	uint32 Seconds = FMath::CeilToInt(GetWorld()->GetTimeSeconds());
+	SetHUDMatchTime(Seconds);
+}
+
+void ASleedPlayerController::SetHUDMatchTime(float MatchTime)
+{
+	SleedHUD = SleedHUD == nullptr ? Cast<ASleedHUD>(GetHUD()) : SleedHUD;
+	bool bHUDValid = SleedHUD &&
+		SleedHUD->CharacterOverlay &&
+		SleedHUD->CharacterOverlay->MatchTimeText;
+	if (bHUDValid)
+	{
+		int32 Minutes = FMath::FloorToInt(MatchTime / 60.f);
+		int32 Seconds = MatchTime - Minutes * 60;
+
+		FString CountdownText = FString::Printf(TEXT("%02d:%02d"), Minutes, Seconds);
+		SleedHUD->CharacterOverlay->MatchTimeText->SetText(FText::FromString(CountdownText));
 	}
 }
 
