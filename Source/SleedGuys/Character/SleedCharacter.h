@@ -47,6 +47,7 @@ public:
 	void RopeButtonPressed();
 	void Celebrate();
 	void GameMenu();
+	void AimTrigger();
 
 	// Stamina Functions
 	void UpdateHUDStamina();
@@ -81,6 +82,8 @@ public:
 
 	void PlayElimMontage();
 
+	void PlayThrowMontage();
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -114,12 +117,22 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Input")
 	UInputAction* GameMenuCall;
 
+	UPROPERTY(EditAnywhere, Category = "Input")
+	UInputAction* AimAction;
+
 	// Damage - Health
 	UFUNCTION()
 	void ReceiveDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, class AController* InstigatorController, AActor* DamageCauser);
 
 	UPROPERTY(EditAnywhere, Category = Combat)
 	UAnimMontage* ElimMontage;
+
+	// Throw Montage
+	UPROPERTY(EditAnywhere, Category = Combat)
+	UAnimMontage* ThrowMontage;
+
+	UFUNCTION(BlueprintCallable)
+	void Throw();
 
 private:
 	// Controller
@@ -307,6 +320,10 @@ private:
 	float ElimDelay = 3.f;
 
 	void ElimTimerFinished();
+
+	// throw
+	UPROPERTY(EditAnywhere, Category = "Throwing")
+	float ThrowPitchOffset = 0.35f;
 
 public:
 	// Place for Getters/Setters only

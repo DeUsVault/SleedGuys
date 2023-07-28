@@ -14,6 +14,7 @@
 #include "SleedGuys/PlayerController/SleedPlayerController.h"
 #include "SleedGuys/GameMode/SleedGameMode.h"
 #include "SleedGuys/PlayerStates/SleedPlayerState.h"
+#include "Kismet/KismetSystemLibrary.h"
 
 #include "NiagaraFunctionLibrary.h"
 #include "Components/CapsuleComponent.h"
@@ -136,10 +137,13 @@ void ASleedCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ASleedCharacter::Jump);
 		EnhancedInputComponent->BindAction(EquipAction, ETriggerEvent::Triggered, this, &ASleedCharacter::EquipButtonPressed);
 		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Triggered, this, &ASleedCharacter::Sprint);
+		EnhancedInputComponent->BindAction(GameMenuCall, ETriggerEvent::Triggered, this, &ASleedCharacter::GameMenu);
+		EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Triggered, this, &ASleedCharacter::AimTrigger);
+
+		// not used ingame atm
 		EnhancedInputComponent->BindAction(RopeAction, ETriggerEvent::Triggered, this, &ASleedCharacter::RopeButtonPressed);
 		EnhancedInputComponent->BindAction(XButtonAction, ETriggerEvent::Triggered, this, &ASleedCharacter::XButtonPressed);
 		EnhancedInputComponent->BindAction(Celebration, ETriggerEvent::Triggered, this, &ASleedCharacter::Celebrate);
-		EnhancedInputComponent->BindAction(GameMenuCall, ETriggerEvent::Triggered, this, &ASleedCharacter::GameMenu);
 	}
 }
 
@@ -881,4 +885,39 @@ void ASleedCharacter::ElimTimerFinished()
 	{
 		SleedGameMode->RequestRespawn(this, Controller);
 	}
+}
+
+// Aim Functions
+
+void ASleedCharacter::AimTrigger()
+{
+	PlayThrowMontage();
+}
+
+void ASleedCharacter::PlayThrowMontage()
+{
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance && ThrowMontage)
+	{
+		AnimInstance->Montage_Play(ThrowMontage);
+	}
+}
+
+void ASleedCharacter::Throw()
+{
+	const FRotator Rotation = Controller->GetControlRotation();
+
+	// Calculate the arrow direction based on the camera rotation
+	FVector ArrowDirection = Rotation.Vector() + FVector(0, 0, ThrowPitchOffset);
+	ArrowDirection.Normalize();
+
+	// Calculate the arrow end point
+	FVector ArrowStart = GetMesh()->GetSocketLocation(FName("ThrowSocket"));
+	FVector ArrowEnd = ArrowStart + (ArrowDirection * 1000.f); // You can adjust the length of the arrow as needed
+
+	FColor ArrowColor = FColor::Red;
+	float ArrowLifeTime = 5.0f; // Arrow will stay visible for 5 seconds
+
+	// Draw the debug arrow
+	UKismetSystemLibrary::DrawDebugArrow(GetWorld(), ArrowStart, ArrowEnd, 10.f, ArrowColor, 5.f, ArrowLifeTime);
 }
