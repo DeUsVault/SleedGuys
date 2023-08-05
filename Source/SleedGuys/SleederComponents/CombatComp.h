@@ -8,6 +8,7 @@
 
 class ABaseWeapon;
 class ASleedCharacter;
+class AProjectile;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class SLEEDGUYS_API UCombatComp : public UActorComponent
@@ -25,11 +26,31 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
+
+	UFUNCTION(Server, Reliable)
+	void ServerStartThrow();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastThrow();
+
+	UFUNCTION(Server, Reliable)
+	void ServerThrow(FVector Location, FRotator Rotation);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastThrowProjectile(FVector Location, FRotator Rotation);
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<AProjectile> ProjectileClass;
+
 private:
 	ASleedCharacter* Character;
 
 	UPROPERTY(Replicated)
 	ABaseWeapon* EquippedWeapon;
+
+	// throw
+	UPROPERTY(EditAnywhere, Category = "Throwing")
+	float ThrowPitchOffset = 20.f;
 
 public:	
 

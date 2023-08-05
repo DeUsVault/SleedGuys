@@ -485,7 +485,6 @@ void ASleedCharacter::XButtonPressed()
 	}
 	else
 	{	
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, TEXT("client"));
 		ButtonPresses++; // we set it locally
 		UpdateStunButtonHUD(ButtonPresses);
 		ServerButtonPressed();
@@ -890,8 +889,11 @@ void ASleedCharacter::ElimTimerFinished()
 // Aim Functions
 
 void ASleedCharacter::AimTrigger()
-{
-	PlayThrowMontage();
+{	
+	if (Combat)
+	{
+		Combat->ServerStartThrow();
+	}
 }
 
 void ASleedCharacter::PlayThrowMontage()
@@ -904,20 +906,15 @@ void ASleedCharacter::PlayThrowMontage()
 }
 
 void ASleedCharacter::Throw()
-{
-	const FRotator Rotation = Controller->GetControlRotation();
-
-	// Calculate the arrow direction based on the camera rotation
-	FVector ArrowDirection = Rotation.Vector() + FVector(0, 0, ThrowPitchOffset);
-	ArrowDirection.Normalize();
-
-	// Calculate the arrow end point
-	FVector ArrowStart = GetMesh()->GetSocketLocation(FName("ThrowSocket"));
-	FVector ArrowEnd = ArrowStart + (ArrowDirection * 1000.f); // You can adjust the length of the arrow as needed
-
-	FColor ArrowColor = FColor::Red;
-	float ArrowLifeTime = 5.0f; // Arrow will stay visible for 5 seconds
-
-	// Draw the debug arrow
-	UKismetSystemLibrary::DrawDebugArrow(GetWorld(), ArrowStart, ArrowEnd, 10.f, ArrowColor, 5.f, ArrowLifeTime);
+{	
+	// gets called from the montage
+	if (IsLocallyControlled())
+	{
+		if (Combat)
+		{	
+			FVector Location = GetMesh()->GetSocketLocation(FName("ThrowSocket"));
+			FRotator Rotation = Controller->GetControlRotation();
+			Combat->ServerThrow(Location, Rotation);
+		}
+	}
 }

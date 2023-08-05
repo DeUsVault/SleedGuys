@@ -321,10 +321,6 @@ private:
 
 	void ElimTimerFinished();
 
-	// throw
-	UPROPERTY(EditAnywhere, Category = "Throwing")
-	float ThrowPitchOffset = 0.35f;
-
 public:
 	// Place for Getters/Setters only
 	void SetOverlappingWeapon(ABaseWeapon* Weapon);

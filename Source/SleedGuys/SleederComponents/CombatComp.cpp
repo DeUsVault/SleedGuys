@@ -7,6 +7,8 @@
 #include "SleedGuys/Enums/CharacterEnums.h"
 #include "Engine/SkeletalMeshSocket.h"
 #include "Net/UnrealNetwork.h"
+#include "Kismet/KismetSystemLibrary.h"
+#include "SleedGuys/Projectiles/Projectile.h"
 
 UCombatComp::UCombatComp()
 {
@@ -43,3 +45,36 @@ void UCombatComp::EquipWeapon(ABaseWeapon* WeaponToEquip)
 	}
 	EquippedWeapon->SetOwner(Character); // owner is replicated on its own
 }
+
+// throw projectile logic
+void UCombatComp::ServerStartThrow_Implementation()
+{
+	MulticastThrow();
+}
+
+void UCombatComp::MulticastThrow_Implementation()
+{	
+	if (Character == nullptr) return;
+
+	Character->PlayThrowMontage();
+}
+
+void UCombatComp::ServerThrow_Implementation(FVector Location, FRotator Rotation)
+{
+	MulticastThrowProjectile(Location, Rotation);
+}
+
+void UCombatComp::MulticastThrowProjectile_Implementation(FVector Location, FRotator Rotation)
+{	
+	// Calculate the direction based on the camera rotation
+	Rotation = Rotation + FRotator(ThrowPitchOffset, 0.f, 0.f); //increment rotation a bit
+	FVector Direction = Rotation.Vector();
+	Direction.Normalize();
+
+	if (ProjectileClass)
+	{
+		AProjectile* Projectile = GetWorld()->SpawnActor<AProjectile>(ProjectileClass, Location, Direction.Rotation());
+		Projectile->SetOwner(Character);
+	}
+}
+
