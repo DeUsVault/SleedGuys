@@ -11,6 +11,7 @@ void ASleedPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ASleedPlayerState, Gold);
+	DOREPLIFETIME_CONDITION(ASleedPlayerState, LastCheckpoint, COND_OwnerOnly);
 }
 
 void ASleedPlayerState::AddGold(int32 AmountOfGold)
@@ -40,4 +41,9 @@ void ASleedPlayerState::OnRep_Gold()
 			SleedPlayerController->SetHUDGold(Gold);
 		}
 	}
+}
+
+void ASleedPlayerState::SetLastCheckpoint(APlayerStart* Checkpoint)
+{
+	LastCheckpoint = Checkpoint;
 }

@@ -75,6 +75,8 @@ void ACheckpointTrigger::GotHitted(ASleedCharacter* Character)
 	{
 		if (Character)
 		{	
+			Character->SetCheckpoint(CheckpointPlayerStart);
+			Destroy();
 		}
 	}
 }

@@ -1,9 +1,10 @@
 #include "SleedGameMode.h"
 #include "SleedGuys/Character/SleedCharacter.h"
 #include "SleedGuys/PlayerController/SleedPlayerController.h"
+#include "SleedGuys/PlayerStates/SleedPlayerState.h"
+
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/PlayerStart.h"
-
 #include "EngineUtils.h"
 #include "Engine/PlayerStartPIE.h"
 
@@ -23,12 +24,33 @@ void ASleedGameMode::RequestRespawn(ACharacter* ElimmedCharacter, AController* E
 		ElimmedCharacter->Destroy();
 	}
 	if (ElimmedController)
-	{
+	{	
+		// check for checkpoint
+		APlayerStart* Checkpoint = checkForCheckpoint(ElimmedController);
+		if (Checkpoint)
+		{
+			RestartPlayerAtPlayerStart(ElimmedController, Checkpoint);
+		}
+		
 		TArray<AActor*> PlayerStarts;
 		UGameplayStatics::GetAllActorsOfClass(this, APlayerStart::StaticClass(), PlayerStarts);
 		int32 Selection = FMath::RandRange(0, PlayerStarts.Num() - 1);
 		RestartPlayerAtPlayerStart(ElimmedController, PlayerStarts[Selection]);
 	}
+}
+
+APlayerStart* ASleedGameMode::checkForCheckpoint(AController*  ElimmedController)
+{	
+	ASleedPlayerState* SleedPlayerState =  Cast<ASleedPlayerState>(ElimmedController->PlayerState);
+	if (SleedPlayerState)
+	{
+		APlayerStart* Checkpoint = SleedPlayerState->getLastCheckpoint();
+		if(Checkpoint)
+		{
+			return Checkpoint;
+		}
+	}
+	return nullptr;
 }
 
 AActor* ASleedGameMode::ChoosePlayerStart_Implementation(AController* Player)

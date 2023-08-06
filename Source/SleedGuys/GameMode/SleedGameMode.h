@@ -6,6 +6,8 @@
 #include "GameFramework/GameMode.h"
 #include "SleedGameMode.generated.h"
 
+class APlayerStart;
+
 /**
  * 
  */
@@ -19,5 +21,8 @@ public:
 	virtual void RequestRespawn(ACharacter* ElimmedCharacter, AController* ElimmedController);
 
 	virtual AActor* ChoosePlayerStart_Implementation(AController* Player) override; // override this to change the player start selection during spawn
+
+private:
+	APlayerStart* checkForCheckpoint(AController* Controller);
 	
 };

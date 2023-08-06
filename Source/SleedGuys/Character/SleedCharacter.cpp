@@ -918,3 +918,18 @@ void ASleedCharacter::Throw()
 		}
 	}
 }
+
+// Checkpoint
+
+void ASleedCharacter::SetCheckpoint(APlayerStart* Checkpoint)
+{
+	SleedPlayerController = SleedPlayerController == nullptr ? Cast<ASleedPlayerController>(Controller) : SleedPlayerController;
+	if (SleedPlayerController)
+	{
+		SleedPlayerState = SleedPlayerState == nullptr ? Cast<ASleedPlayerState>(SleedPlayerController->PlayerState) : SleedPlayerState;
+		if (SleedPlayerState)
+		{
+			SleedPlayerState->SetLastCheckpoint(Checkpoint);
+		}
+	}
+}

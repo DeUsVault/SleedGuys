@@ -8,6 +8,7 @@
 
 class ASleedCharacter;
 class ASleedPlayerController;
+class APlayerStart;
 
 /**
  * 
@@ -21,6 +22,7 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	void AddGold(int32 AmountOfGold);
+	void SetLastCheckpoint(APlayerStart* Checkpoint);
 
 protected:
 	UPROPERTY(ReplicatedUsing = OnRep_Gold, VisibleAnywhere)
@@ -32,5 +34,12 @@ protected:
 private:
 	ASleedCharacter* SleedCharacter;
 	ASleedPlayerController* SleedPlayerController;
+
+	UPROPERTY(Replicated)
+	APlayerStart* LastCheckpoint = nullptr;
+
+public:
+	// Place for Getters/Setters only
+	FORCEINLINE APlayerStart* getLastCheckpoint() { return this->LastCheckpoint; }
 	
 };

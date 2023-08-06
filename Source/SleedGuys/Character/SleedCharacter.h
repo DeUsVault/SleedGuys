@@ -20,6 +20,7 @@ class ASleedPlayerState;
 class ARopeSwing;
 class USleedCableComponent;
 class UNiagaraSystem;
+class APlayerStart;
 
 UCLASS()
 class SLEEDGUYS_API ASleedCharacter : public ACharacter
@@ -338,4 +339,5 @@ public:
 	FORCEINLINE bool IsCelebrating() const { return this->bIsCelebrating; }
 	FORCEINLINE bool GetIsSliding() const { return this->bIsSliding; }
 	FORCEINLINE bool IsElimmed() const { return bElimmed; }
+	void SetCheckpoint(APlayerStart* Checkpoint);
 };
