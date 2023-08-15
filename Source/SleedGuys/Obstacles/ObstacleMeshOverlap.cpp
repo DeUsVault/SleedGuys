@@ -5,29 +5,34 @@
 
 AObstacleMeshOverlap::AObstacleMeshOverlap()
 {
-	ObstacleMesh->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-	ObstacleMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
-	ObstacleMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
-
-	BaseMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BaseMesh"));
-	BaseMesh->SetupAttachment(ObstacleMesh);
+	OverlapMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BaseMesh"));
+	OverlapMesh->SetupAttachment(ObstacleMesh);
+	OverlapMesh->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	OverlapMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+	OverlapMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
+	OverlapMesh->SetVisibility(false);
 }
 
 void AObstacleMeshOverlap::BeginPlay()
 {
 	Super::BeginPlay();
+
+	if (HasAuthority())
+	{
+		BindOverlap();
+	}
 }
 
 void AObstacleMeshOverlap::BindOverlap()
 {	
-	//Destroy();
-	ObstacleMesh->OnComponentBeginOverlap.AddDynamic(this, &AObstacleMeshOverlap::OnBoxOverlap);
-	GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Yellow, TEXT("AObstacleMeshOverlap BindOverlap function"));
+	OverlapMesh->OnComponentBeginOverlap.AddDynamic(this, &AObstacleMeshOverlap::OnMeshOverlap);
+	OverlapMesh->OnComponentEndOverlap.AddDynamic(this, &AObstacleMeshOverlap::OnMeshEndOverlap);
 }
 
-void AObstacleMeshOverlap::OnBoxOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+void AObstacleMeshOverlap::OnMeshOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Yellow, TEXT("AObstacleMeshOverlap"));
+}
 
-	//Destroy();
+void AObstacleMeshOverlap::OnMeshEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
 }

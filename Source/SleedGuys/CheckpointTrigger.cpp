@@ -1,8 +1,10 @@
 #include "CheckpointTrigger.h"
 #include "GameFramework/ProjectileMovementComponent.h"
+#include "SleedGuys/Character/SleedCharacter.h"
 #include "GameFramework/PlayerStart.h"
 #include "Components/SphereComponent.h"
-#include "SleedGuys/Character/SleedCharacter.h"
+#include "NiagaraFunctionLibrary.h"
+#include "Components/TextRenderComponent.h"
 
 ACheckpointTrigger::ACheckpointTrigger()
 {
@@ -23,6 +25,9 @@ ACheckpointTrigger::ACheckpointTrigger()
 	CheckpointMovementComponent->MaxSpeed = 2000.0f;
 	CheckpointMovementComponent->ProjectileGravityScale = 0.f;
 	CheckpointMovementComponent->bRotationFollowsVelocity = false;
+
+	Text = CreateDefaultSubobject<UTextRenderComponent>(TEXT("Text"));
+	Text->SetupAttachment(RootComponent);
 }
 
 void ACheckpointTrigger::BeginPlay()
@@ -64,6 +69,14 @@ void ACheckpointTrigger::OnSphereOverlap(UPrimitiveComponent* OverlappedComponen
 
 				FVector NewVelocity = MoveDirection.GetSafeNormal() * DesiredSpeed;
 				CheckpointMovementComponent->Velocity = NewVelocity;
+
+				// destroy actor in DestroyTime seconds
+				GetWorldTimerManager().SetTimer(
+					DestroyTimer,
+					this,
+					&ACheckpointTrigger::BindDestroyTimerFinished,
+					DestroyTime
+				);
 			}
 		}
 	}
@@ -81,3 +94,20 @@ void ACheckpointTrigger::GotHitted(ASleedCharacter* Character)
 	}
 }
 
+void ACheckpointTrigger::BindDestroyTimerFinished()
+{	
+	GetWorldTimerManager().ClearTimer(DestroyTimer);
+	Destroy();
+}
+
+void ACheckpointTrigger::Destroyed()
+{
+	if (DestructionEffect)
+	{
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+			this,
+			DestructionEffect,
+			GetActorLocation()
+		);
+	}
+}

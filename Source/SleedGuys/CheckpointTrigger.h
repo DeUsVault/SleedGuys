@@ -10,6 +10,8 @@ class UProjectileMovementComponent;
 class USphereComponent;
 class ASleedCharacter;
 class APlayerStart;
+class UNiagaraSystem;
+class UTextRenderComponent;
 
 UCLASS()
 class SLEEDGUYS_API ACheckpointTrigger : public AActor
@@ -18,6 +20,7 @@ class SLEEDGUYS_API ACheckpointTrigger : public AActor
 	
 public:	
 	ACheckpointTrigger();
+	virtual void Destroyed() override;
 
 	UFUNCTION()
 	virtual void OnSphereOverlap(
@@ -40,6 +43,9 @@ protected:
 	UPROPERTY(EditInstanceOnly)
 	APlayerStart* CheckpointPlayerStart;
 
+	UPROPERTY(EditAnywhere)
+	UNiagaraSystem* DestructionEffect;
+
 private:
 	UPROPERTY(EditDefaultsOnly)
 	UStaticMeshComponent* CheckpointMesh;
@@ -57,5 +63,15 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	float DesiredSpeed = 150.f;
+
+	// trigger destroy function
+	FTimerHandle DestroyTimer;
+	UPROPERTY(EditAnywhere)
+	float DestroyTime = 20.f;
+	virtual void BindDestroyTimerFinished();
+
+	// text
+	UPROPERTY(EditAnywhere)
+	UTextRenderComponent* Text;
 
 };

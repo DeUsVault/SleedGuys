@@ -3,13 +3,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "ObstacleSphereOverlap.h"
+#include "ObstacleMeshOverlap.h"
 #include "ObstacleSlide.generated.h"
 
 class UNiagaraComponent;
 
 UCLASS()
-class SLEEDGUYS_API AObstacleSlide : public AObstacleSphereOverlap
+class SLEEDGUYS_API AObstacleSlide : public AObstacleMeshOverlap
 {
 	GENERATED_BODY()
 
@@ -19,7 +19,7 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
-	virtual void OnSphereOverlap(
+	virtual void OnMeshOverlap(
 		UPrimitiveComponent* OverlappedComponent,
 		AActor* OtherActor,
 		UPrimitiveComponent* OtherComp,
@@ -28,7 +28,7 @@ protected:
 		const FHitResult& SweepResult
 	) override;
 
-	virtual void OnSphereEndOverlap(
+	virtual void OnMeshEndOverlap(
 		UPrimitiveComponent* OverlappedComponent,
 		AActor* OtherActor,
 		UPrimitiveComponent* OtherComp,

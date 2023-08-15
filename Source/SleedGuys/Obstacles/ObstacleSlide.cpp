@@ -16,7 +16,7 @@ void AObstacleSlide::BeginPlay()
 	Super::BeginPlay();
 }
 
-void AObstacleSlide::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+void AObstacleSlide::OnMeshOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("slide start"));
 	ASleedCharacter* SleedCharacter = Cast<ASleedCharacter>(OtherActor);
@@ -28,7 +28,7 @@ void AObstacleSlide::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, A
 	}
 }
 
-void AObstacleSlide::OnSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+void AObstacleSlide::OnMeshEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
 	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("slide end"));
 	ASleedCharacter* SleedCharacter = Cast<ASleedCharacter>(OtherActor);

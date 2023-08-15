@@ -22,6 +22,12 @@ public:
 	UTextBlock* ResumeButtonText;
 
 	UPROPERTY(meta = (BindWidget))
+	UButton* RestartButton;
+
+	UPROPERTY(meta = (BindWidget))
+	UTextBlock* RestartButtonText;
+
+	UPROPERTY(meta = (BindWidget))
 	UButton* ExitButton;
 
 	UPROPERTY(meta = (BindWidget))
@@ -33,6 +39,9 @@ protected:
 private:
 	UFUNCTION()
 	void ResumeButtonClicked();
+
+	UFUNCTION()
+	void RestartButtonClicked();
 
 	UFUNCTION()
 	void ExitButtonClicked();

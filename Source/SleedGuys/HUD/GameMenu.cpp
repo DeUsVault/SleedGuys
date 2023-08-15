@@ -1,8 +1,9 @@
 #include "GameMenu.h"
 #include "Components/Button.h"
 #include "GameFramework/PlayerController.h"
-#include "SleedGuys/PlayerController/SleedPlayerController.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "SleedGuys/PlayerController/SleedPlayerController.h"
+#include "SleedGuys/GameMode/SleedGameMode.h"
 
 bool UGameMenu::Initialize()
 {
@@ -17,6 +18,10 @@ bool UGameMenu::Initialize()
 	{
 		ResumeButton->OnClicked.AddDynamic(this, &ThisClass::ResumeButtonClicked);
 	}
+	if (RestartButton)
+	{
+		RestartButton->OnClicked.AddDynamic(this, &ThisClass::RestartButtonClicked);
+	}
 	if (ExitButton)
 	{
 		ExitButton->OnClicked.AddDynamic(this, &ThisClass::ExitButtonClicked);
@@ -27,7 +32,6 @@ bool UGameMenu::Initialize()
 
 void UGameMenu::ResumeButtonClicked()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, TEXT("resume game mode"));
 	APlayerController* Controller = GetOwningPlayer();
 	if (Controller)
 	{
@@ -39,9 +43,21 @@ void UGameMenu::ResumeButtonClicked()
 	}
 }
 
+void UGameMenu::RestartButtonClicked()
+{
+	ASleedGameMode* SleedGameMode = GetWorld()->GetAuthGameMode<ASleedGameMode>();
+	APlayerController* Controller = GetOwningPlayer();
+
+	if (SleedGameMode && Controller)
+	{
+		SleedGameMode->RestartGame();
+		Controller->SetInputMode(FInputModeGameOnly());
+		Controller->bShowMouseCursor = false;
+	}
+}
+
 void UGameMenu::ExitButtonClicked()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("exit game mode"));
 	APlayerController* Controller = GetOwningPlayer();
 	if (Controller)
 	{

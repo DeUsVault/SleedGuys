@@ -17,14 +17,13 @@ class SLEEDGUYS_API AObstacleMeshOverlap : public AObstacle
 public:
 	AObstacleMeshOverlap();
 
-	// bind overlap is called on the actor from another actor, for example from the ObstacleArray
 	virtual void BindOverlap() override;
 
 protected:
 	virtual void BeginPlay() override;
 
 	UFUNCTION()
-	virtual void OnBoxOverlap(
+	virtual void OnMeshOverlap(
 		UPrimitiveComponent* OverlappedComponent,
 		AActor* OtherActor,
 		UPrimitiveComponent* OtherComp,
@@ -33,7 +32,15 @@ protected:
 		const FHitResult& SweepResult
 	);
 
+	UFUNCTION()
+	virtual void OnMeshEndOverlap(
+		UPrimitiveComponent* OverlappedComponent,
+		AActor* OtherActor,
+		UPrimitiveComponent* OtherComp,
+		int32 OtherBodyIndex
+	);
+
 private:
 	UPROPERTY(EditAnywhere)
-	UStaticMeshComponent* BaseMesh;
+	UStaticMeshComponent* OverlapMesh;
 };
