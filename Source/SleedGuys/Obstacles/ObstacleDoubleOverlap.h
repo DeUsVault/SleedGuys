@@ -10,6 +10,7 @@
 class UBoxComponent;
 class UNiagaraSystem;
 class UCustomDamageType;
+class USoundCue;
 
 /**
  * 
@@ -60,4 +61,11 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Damage")
 	TSubclassOf<UCustomDamageType> DamageTypeClass;
+
+private:
+	UPROPERTY(EditAnywhere)
+	UNiagaraSystem* OverlapEffect;
+
+	UPROPERTY(EditAnywhere)
+	USoundCue* OverlapSound;
 };

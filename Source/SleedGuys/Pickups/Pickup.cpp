@@ -102,9 +102,7 @@ void APickup::RotateActor(float DeltaTime)
 }
 
 void APickup::Destroyed()
-{
-	Super::Destroyed();
-
+{	
 	if (PickupSound)
 	{
 		UGameplayStatics::PlaySoundAtLocation(
@@ -113,5 +111,7 @@ void APickup::Destroyed()
 			GetActorLocation()
 		);
 	}
+
+	Super::Destroyed();
 }
 

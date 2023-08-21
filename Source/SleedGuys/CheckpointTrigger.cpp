@@ -5,6 +5,8 @@
 #include "Components/SphereComponent.h"
 #include "NiagaraFunctionLibrary.h"
 #include "Components/TextRenderComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "Sound/SoundCue.h"
 
 ACheckpointTrigger::ACheckpointTrigger()
 {
@@ -101,7 +103,7 @@ void ACheckpointTrigger::BindDestroyTimerFinished()
 }
 
 void ACheckpointTrigger::Destroyed()
-{
+{	
 	if (DestructionEffect)
 	{
 		UNiagaraFunctionLibrary::SpawnSystemAtLocation(
@@ -110,4 +112,15 @@ void ACheckpointTrigger::Destroyed()
 			GetActorLocation()
 		);
 	}
+
+	if (BoomSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(
+			this,
+			BoomSound,
+			GetActorLocation()
+		);
+	}
+
+	Super::Destroyed();
 }

@@ -9,6 +9,7 @@
 class USphereComponent;
 class UProjectileMovementComponent;
 class UNiagaraSystem;
+class USoundCue;
 
 UCLASS()
 class SLEEDGUYS_API AProjectile : public AActor
@@ -50,6 +51,11 @@ protected:
 	UNiagaraSystem* DestructionEffect = nullptr;
 
 	void playNiagaraEffect(UNiagaraSystem* Effect);
+
+	UPROPERTY(EditAnywhere)
+	USoundCue* HitSound;
+
+	void playSoundEffect(USoundCue* Sound);
 
 private:	
 	UPROPERTY(EditDefaultsOnly, Category = "Combat")

@@ -16,10 +16,11 @@ void ASleedGameMode::PlayerEliminated(ASleedCharacter* ElimmedCharacter, ASleedP
 	}
 }
 
-void ASleedGameMode::RequestRespawn(ACharacter* ElimmedCharacter, AController* ElimmedController)
+void ASleedGameMode::RequestRespawn(ASleedCharacter* ElimmedCharacter, AController* ElimmedController)
 {
 	if (ElimmedCharacter)
-	{
+	{	
+		ElimmedCharacter->AddDeath();
 		ElimmedCharacter->Reset();
 		ElimmedCharacter->Destroy();
 	}
@@ -31,11 +32,16 @@ void ASleedGameMode::RequestRespawn(ACharacter* ElimmedCharacter, AController* E
 		{
 			RestartPlayerAtPlayerStart(ElimmedController, Checkpoint);
 		}
-		
-		TArray<AActor*> PlayerStarts;
-		UGameplayStatics::GetAllActorsOfClass(this, APlayerStart::StaticClass(), PlayerStarts);
-		int32 Selection = FMath::RandRange(0, PlayerStarts.Num() - 1);
-		RestartPlayerAtPlayerStart(ElimmedController, PlayerStarts[Selection]);
+		else
+		{
+			//TArray<AActor*> PlayerStarts;
+			//UGameplayStatics::GetAllActorsOfClass(this, APlayerStart::StaticClass(), PlayerStarts);
+			//int32 Selection = FMath::RandRange(0, PlayerStarts.Num() - 1);
+			//RestartPlayerAtPlayerStart(ElimmedController, PlayerStarts[Selection]);
+
+			auto Start = this->ChoosePlayerStart_Implementation(ElimmedController);
+			RestartPlayerAtPlayerStart(ElimmedController, Start);
+		}
 	}
 }
 

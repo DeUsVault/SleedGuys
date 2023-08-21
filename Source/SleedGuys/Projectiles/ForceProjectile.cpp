@@ -46,6 +46,7 @@ void AForceProjectile::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent,
 			HittedCharacter->ChangeAirFrictionAndLunch(LaunchPower);
 
 			playNiagaraEffect(CollisionEffect);
+			playSoundEffect(HitSound);
 
 			if (IsValid(this))
 			{

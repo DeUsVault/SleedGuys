@@ -12,6 +12,7 @@ class ASleedCharacter;
 class APlayerStart;
 class UNiagaraSystem;
 class UTextRenderComponent;
+class USoundCue;
 
 UCLASS()
 class SLEEDGUYS_API ACheckpointTrigger : public AActor
@@ -73,5 +74,9 @@ private:
 	// text
 	UPROPERTY(EditAnywhere)
 	UTextRenderComponent* Text;
+
+	// sound
+	UPROPERTY(EditAnywhere)
+	USoundCue* BoomSound;
 
 };

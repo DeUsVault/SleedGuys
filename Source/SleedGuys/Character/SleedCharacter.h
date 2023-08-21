@@ -76,14 +76,20 @@ public:
 	void setIsSliding(bool bSlides);
 
 	// Death logic
+	void GameModeElimination();
+
 	void Elim();
 
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastElim();
 
+	void ElimTimerFinished();
+
 	void PlayElimMontage();
 
 	void PlayThrowMontage();
+
+	void AddDeath();
 
 protected:
 	virtual void BeginPlay() override;
@@ -319,8 +325,6 @@ private:
 
 	UPROPERTY(EditDefaultsOnly)
 	float ElimDelay = 3.f;
-
-	void ElimTimerFinished();
 
 public:
 	// Place for Getters/Setters only

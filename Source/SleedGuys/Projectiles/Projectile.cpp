@@ -5,6 +5,8 @@
 #include "Components/SphereComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "NiagaraFunctionLibrary.h"
+#include "Kismet/GameplayStatics.h"
+#include "Sound/SoundCue.h"
 
 AProjectile::AProjectile()
 {
@@ -72,6 +74,18 @@ void AProjectile::playNiagaraEffect(UNiagaraSystem* Effect)
 		UNiagaraFunctionLibrary::SpawnSystemAtLocation(
 			this,
 			Effect,
+			GetActorLocation()
+		);
+	}
+}
+
+void AProjectile::playSoundEffect(USoundCue* Sound)
+{
+	if (HitSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(
+			this,
+			HitSound,
 			GetActorLocation()
 		);
 	}

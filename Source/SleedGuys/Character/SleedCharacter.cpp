@@ -182,13 +182,18 @@ void ASleedCharacter::ReceiveDamage(AActor* DamagedActor, float Damage, const UD
 
 	if(!IsAlive())
 	{
-		ASleedGameMode* SleedGameMode = GetWorld()->GetAuthGameMode<ASleedGameMode>();
-		if (SleedGameMode && Controller)
-		{	
-			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("sleed game mode"));
-			SleedPlayerController = SleedPlayerController == nullptr ? Cast<ASleedPlayerController>(Controller) : SleedPlayerController;
-			SleedGameMode->PlayerEliminated(this, SleedPlayerController);
-		}
+		GameModeElimination();
+	}
+}
+
+void ASleedCharacter::GameModeElimination()
+{
+	ASleedGameMode* SleedGameMode = GetWorld()->GetAuthGameMode<ASleedGameMode>();
+	if (SleedGameMode && Controller)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("sleed game mode"));
+		SleedPlayerController = SleedPlayerController == nullptr ? Cast<ASleedPlayerController>(Controller) : SleedPlayerController;
+		SleedGameMode->PlayerEliminated(this, SleedPlayerController);
 	}
 }
 
@@ -883,6 +888,19 @@ void ASleedCharacter::ElimTimerFinished()
 	if (SleedGameMode)
 	{
 		SleedGameMode->RequestRespawn(this, Controller);
+	}
+}
+
+void ASleedCharacter::AddDeath()
+{
+	SleedPlayerController = SleedPlayerController == nullptr ? Cast<ASleedPlayerController>(Controller) : SleedPlayerController;
+	if (SleedPlayerController)
+	{
+		SleedPlayerState = SleedPlayerState == nullptr ? Cast<ASleedPlayerState>(SleedPlayerController->PlayerState) : SleedPlayerState;
+		if (SleedPlayerState)
+		{
+			SleedPlayerState->AddDeath();
+		}
 	}
 }
 

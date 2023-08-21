@@ -4,6 +4,8 @@
 #include "ObstacleDoubleOverlap.h"
 #include "Components/BoxComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Sound/SoundCue.h"
+#include "NiagaraFunctionLibrary.h"
 #include "SleedGuys/Character/SleedCharacter.h"
 
 AObstacleDoubleOverlap::AObstacleDoubleOverlap()
@@ -56,5 +58,23 @@ void AObstacleDoubleOverlap::HandleCharacterOverlap(AActor* OtherActor, const FH
 		GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Yellow, TEXT("hit oneshot"));
 		float OneshotDamageNeeded = SleedCharacter->GetHealth();
 		UGameplayStatics::ApplyDamage(SleedCharacter, OneshotDamageNeeded, nullptr, this, UDamageType::StaticClass());
+
+		if (OverlapSound)
+		{
+			UGameplayStatics::PlaySoundAtLocation(
+				this,
+				OverlapSound,
+				SleedCharacter->GetActorLocation()
+			);
+		}
+
+		if (OverlapEffect)
+		{
+			UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+				this,
+				OverlapEffect,
+				SleedCharacter->GetActorLocation()
+			);
+		}
 	}
 }

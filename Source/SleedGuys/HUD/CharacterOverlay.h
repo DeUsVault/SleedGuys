@@ -31,9 +31,12 @@ public:
 	UTextBlock* StaminaText;
 
 	UPROPERTY(meta = (BindWidget))
-	class UTextBlock* CoinText;
+	UTextBlock* CoinText;
 
 	UPROPERTY(meta = (BindWidget))
-	class UTextBlock* MatchTimeText;
+	UTextBlock* MatchTimeText;
+
+	UPROPERTY(meta = (BindWidget))
+	UTextBlock* DeathsNumText;
 	
 };

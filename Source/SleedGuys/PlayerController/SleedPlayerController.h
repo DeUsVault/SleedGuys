@@ -26,6 +26,7 @@ public:
 	void SetHUDStunButtons(int32 num);
 	void SetGameMenuWidget();
 	void SetHUDMatchTime(float Time);
+	void SetHUDDeaths(int32 Deaths);
 
 protected:
 	virtual void BeginPlay() override;

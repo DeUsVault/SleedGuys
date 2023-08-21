@@ -7,6 +7,8 @@
 #include "SleedGuys/Enums/DamageTypes.h"
 #include "MovingObstacleTurret.generated.h"
 
+class USoundCue;
+
 /**
  * 
  */
@@ -36,4 +38,8 @@ private:
 	float DamageCooldownDuration = 0.1f;
 
 	FTimerHandle DamageCooldownTimerHandle;
+
+	// hit sound
+	UPROPERTY(EditAnywhere)
+	USoundCue* HitSound;
 };

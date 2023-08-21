@@ -12,6 +12,7 @@ void ASleedPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 
 	DOREPLIFETIME(ASleedPlayerState, Gold);
 	DOREPLIFETIME_CONDITION(ASleedPlayerState, LastCheckpoint, COND_OwnerOnly);
+	DOREPLIFETIME_CONDITION(ASleedPlayerState, Deaths, COND_OwnerOnly);
 }
 
 void ASleedPlayerState::AddGold(int32 AmountOfGold)
@@ -39,6 +40,33 @@ void ASleedPlayerState::OnRep_Gold()
 		if (SleedPlayerController)
 		{
 			SleedPlayerController->SetHUDGold(Gold);
+		}
+	}
+}
+
+void ASleedPlayerState::AddDeath()
+{
+	Deaths = Deaths + 1;
+	SleedCharacter = SleedCharacter == nullptr ? Cast<ASleedCharacter>(GetPawn()) : SleedCharacter;
+	if (SleedCharacter)
+	{
+		SleedPlayerController = SleedPlayerController == nullptr ? Cast<ASleedPlayerController>(SleedCharacter->Controller) : SleedPlayerController;
+		if (SleedPlayerController)
+		{
+			SleedPlayerController->SetHUDDeaths(Deaths);
+		}
+	}
+}
+
+void ASleedPlayerState::OnRep_Deaths()
+{
+	SleedCharacter = SleedCharacter == nullptr ? Cast<ASleedCharacter>(GetPawn()) : SleedCharacter;
+	if (SleedCharacter)
+	{
+		SleedPlayerController = SleedPlayerController == nullptr ? Cast<ASleedPlayerController>(SleedCharacter->Controller) : SleedPlayerController;
+		if (SleedPlayerController)
+		{
+			SleedPlayerController->SetHUDDeaths(Deaths);
 		}
 	}
 }

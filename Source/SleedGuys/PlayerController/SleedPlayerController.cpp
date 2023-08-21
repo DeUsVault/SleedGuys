@@ -163,3 +163,16 @@ void ASleedPlayerController::SetHUDMatchTime(float MatchTime)
 	}
 }
 
+void ASleedPlayerController::SetHUDDeaths(int32 Deaths)
+{
+	SleedHUD = SleedHUD == nullptr ? Cast<ASleedHUD>(GetHUD()) : SleedHUD;
+	bool bHUDValid = SleedHUD &&
+		SleedHUD->CharacterOverlay &&
+		SleedHUD->CharacterOverlay->DeathsNumText;
+	if (bHUDValid)
+	{	
+		FString DeathText = FString::Printf(TEXT("Deaths : %d"), Deaths);
+		SleedHUD->CharacterOverlay->DeathsNumText->SetText(FText::FromString(DeathText));
+	}
+}
+

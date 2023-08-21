@@ -2,9 +2,10 @@
 
 
 #include "MovingObstacleTurret.h"
-#include "Particles/ParticleSystemComponent.h"
 #include "SleedGuys/Character/SleedCharacter.h"
+#include "Particles/ParticleSystemComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Sound/SoundCue.h"
 
 AMovingObstacleTurret::AMovingObstacleTurret()
 {	
@@ -24,10 +25,18 @@ void AMovingObstacleTurret::ActorOverlap(AActor* Actor)
 	ASleedCharacter* SleedCharacter = Cast<ASleedCharacter>(Actor);
 	if (SleedCharacter)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Yellow, TEXT("hit"));
 		UGameplayStatics::ApplyDamage(SleedCharacter, DamagePerSecond, nullptr, this, UDamageType::StaticClass());
 
 		bCanApplyDamage = false;
+
+		if (HitSound)
+		{
+			UGameplayStatics::PlaySoundAtLocation(
+				this,
+				HitSound,
+				SleedCharacter->GetActorLocation()
+			);
+		}
 	}
 }
 
