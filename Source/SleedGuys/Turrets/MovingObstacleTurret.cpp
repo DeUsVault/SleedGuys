@@ -24,7 +24,8 @@ void AMovingObstacleTurret::ActorOverlap(AActor* Actor)
 
 	ASleedCharacter* SleedCharacter = Cast<ASleedCharacter>(Actor);
 	if (SleedCharacter)
-	{
+	{	
+		if (SleedCharacter->IsElimmed()) return; // do not apply damage to already dead character
 		UGameplayStatics::ApplyDamage(SleedCharacter, DamagePerSecond, nullptr, this, UDamageType::StaticClass());
 
 		bCanApplyDamage = false;

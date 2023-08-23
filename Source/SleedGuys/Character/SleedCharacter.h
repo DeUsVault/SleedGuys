@@ -21,6 +21,7 @@ class ARopeSwing;
 class USleedCableComponent;
 class UNiagaraSystem;
 class APlayerStart;
+class USleedSaveGame;
 
 UCLASS()
 class SLEEDGUYS_API ASleedCharacter : public ACharacter
@@ -344,4 +345,6 @@ public:
 	FORCEINLINE bool GetIsSliding() const { return this->bIsSliding; }
 	FORCEINLINE bool IsElimmed() const { return bElimmed; }
 	void SetCheckpoint(APlayerStart* Checkpoint);
+
+	USleedSaveGame* getDataForSave();
 };

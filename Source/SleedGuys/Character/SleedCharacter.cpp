@@ -19,6 +19,10 @@
 #include "NiagaraFunctionLibrary.h"
 #include "Components/CapsuleComponent.h"
 
+#include "SleedGuys/Save/SleedSaveGame.h"
+#include "Kismet/GameplayStatics.h"
+#include "SleedGuys/GameInstance/SleedGameInstance.h"
+
 #include "Components/InputComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
@@ -191,7 +195,6 @@ void ASleedCharacter::GameModeElimination()
 	ASleedGameMode* SleedGameMode = GetWorld()->GetAuthGameMode<ASleedGameMode>();
 	if (SleedGameMode && Controller)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("sleed game mode"));
 		SleedPlayerController = SleedPlayerController == nullptr ? Cast<ASleedPlayerController>(Controller) : SleedPlayerController;
 		SleedGameMode->PlayerEliminated(this, SleedPlayerController);
 	}
@@ -828,13 +831,21 @@ void ASleedCharacter::Celebrate()
 		bIsCelebrating = true;
 	}
 	*/
-
-	ElimTimerFinished();
+	USleedGameInstance* MyGameInstance = Cast<USleedGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
+	if (MyGameInstance)
+	{
+		auto SaveData = MyGameInstance->LoadGameData();
+		if (SaveData)
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, FString::FromInt(SaveData->TimeSpent));
+			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, FString::FromInt(SaveData->Deaths));
+			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, FString::FromInt(SaveData->Coins));
+		}
+	}
 }
 
 void ASleedCharacter::GameMenu()
 {	
-	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Blue, TEXT("pressed P"));
 	SleedPlayerController = SleedPlayerController == nullptr ? Cast<ASleedPlayerController>(Controller) : SleedPlayerController;
 	if (SleedPlayerController)
 	{
@@ -858,18 +869,16 @@ void ASleedCharacter::Elim()
 
 void ASleedCharacter::MulticastElim_Implementation()
 {
-	bElimmed = true;
-	PlayElimMontage();
+	if (bElimmed == false)
+	{
+		PlayElimMontage(); // only play montage the first time while bElimmed = false
+		bElimmed = true;
+	}
 
-	// Disable character movement
-	GetCharacterMovement()->DisableMovement();
-	GetCharacterMovement()->StopMovementImmediately();
 	if (SleedPlayerController)
 	{
 		DisableInput(SleedPlayerController);
 	}
-	// Disable collision
-	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
@@ -950,4 +959,31 @@ void ASleedCharacter::SetCheckpoint(APlayerStart* Checkpoint)
 			SleedPlayerState->SetLastCheckpoint(Checkpoint);
 		}
 	}
+}
+
+USleedSaveGame* ASleedCharacter::getDataForSave()
+{	
+	// We need controller + player state to access the data we want
+	SleedPlayerController = SleedPlayerController == nullptr ? Cast<ASleedPlayerController>(Controller) : SleedPlayerController;
+	if (!SleedPlayerController) return nullptr;
+
+	SleedPlayerState = SleedPlayerState == nullptr ? Cast<ASleedPlayerState>(SleedPlayerController->PlayerState) : SleedPlayerState;
+	if (!SleedPlayerState) return nullptr;
+	
+	// Create a new instance of the save game class
+	USleedSaveGame* SaveGameData = NewObject<USleedSaveGame>();
+	
+	// Populate the save game object with data from your character
+	if (SaveGameData)
+	{	
+		// Assuming these are your character's variables
+		SaveGameData->PlayerLocation = GetActorLocation();
+		SaveGameData->TimeSpent = FMath::CeilToInt(GetWorld()->GetTimeSeconds());
+		SaveGameData->Deaths = SleedPlayerState->getDeaths();
+		SaveGameData->Coins = SleedPlayerState->getGold();
+		
+		return SaveGameData;
+	}
+
+	return nullptr;
 }

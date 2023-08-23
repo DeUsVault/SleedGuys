@@ -48,5 +48,7 @@ private:
 public:
 	// Place for Getters/Setters only
 	FORCEINLINE APlayerStart* getLastCheckpoint() { return this->LastCheckpoint; }
+	FORCEINLINE int32 getGold() { return Gold; }
+	FORCEINLINE int32 getDeaths() { return Deaths; }
 	
 };
