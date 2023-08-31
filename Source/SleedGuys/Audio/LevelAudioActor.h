@@ -24,7 +24,7 @@ protected:
 
 private:
 	UPROPERTY(EditDefaultsOnly)
-	UStaticMeshComponent* AudioActorMesh;
+	USceneComponent* AudioSceneComponent;
 
 	UPROPERTY(VisibleAnywhere)
 	UAudioComponent* AudioComponent;

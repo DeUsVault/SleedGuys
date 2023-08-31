@@ -8,8 +8,8 @@ ALevelAudioActor::ALevelAudioActor()
 	PrimaryActorTick.bCanEverTick = false;
 	bReplicates = true;
 
-	AudioActorMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("AudioActorMesh"));
-	SetRootComponent(AudioActorMesh);
+	AudioSceneComponent = CreateDefaultSubobject<USceneComponent>(TEXT("AudioSceneComponent"));
+	SetRootComponent(AudioSceneComponent);
 
 	AudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("AudioComponent"));
 	AudioComponent->bIsUISound = false;
