@@ -15,6 +15,7 @@
 #include "SleedGuys/GameMode/SleedGameMode.h"
 #include "SleedGuys/PlayerStates/SleedPlayerState.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "Sound/SoundCue.h"
 
 #include "NiagaraFunctionLibrary.h"
 #include "Components/CapsuleComponent.h"
@@ -164,6 +165,7 @@ void ASleedCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutL
 	DOREPLIFETIME(ASleedCharacter, Cable); 
 	DOREPLIFETIME(ASleedCharacter, bIsCelebrating);
 	DOREPLIFETIME(ASleedCharacter, bIsSliding);
+	DOREPLIFETIME(ASleedCharacter, bFallDeath);
 }
 
 void ASleedCharacter::PostInitializeComponents()
@@ -326,6 +328,7 @@ void ASleedCharacter::Jump()
 		JumpState = EJumpState::EJS_FirstJump;
 
 		NiagaraJumpEffect(FirstJumpEffect);
+		PlayJumpSound();
 	}
 	else if (JumpState == EJumpState::EJS_FirstJump)
 	{
@@ -338,6 +341,7 @@ void ASleedCharacter::Jump()
 		UpdateHUDStamina();
 
 		NiagaraJumpEffect(SecondaryJumpEffect);
+		PlayJumpSound();
 	}
 	else if (JumpState == EJumpState::EJS_Swinging)
 	{	
@@ -361,6 +365,18 @@ void ASleedCharacter::NiagaraJumpEffect(UNiagaraSystem* JumpEffect)
 			this,
 			JumpEffect,
 			GetMesh()->GetSocketLocation(FName("JumpEffectSocket"))
+		);
+	}
+}
+
+void ASleedCharacter::PlayJumpSound()
+{
+	if (JumpSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(
+			this,
+			JumpSound,
+			GetActorLocation()
 		);
 	}
 }
@@ -870,7 +886,7 @@ void ASleedCharacter::Elim()
 void ASleedCharacter::MulticastElim_Implementation()
 {
 	if (bElimmed == false)
-	{
+	{	
 		PlayElimMontage(); // only play montage the first time while bElimmed = false
 		bElimmed = true;
 	}
@@ -946,8 +962,36 @@ void ASleedCharacter::Throw()
 	}
 }
 
-// Checkpoint
+// falling
+void ASleedCharacter::initFallDeath()
+{	// called on server
 
+	if (bElimmed) return;
+
+	bFallDeath = true;
+
+	if (SleedPlayerController)
+	{
+		DisableInput(SleedPlayerController);
+	}
+
+	GetWorldTimerManager().SetTimer(
+		ElimTimer,
+		this,
+		&ASleedCharacter::ElimTimerFinished,
+		ElimDelay
+	);
+}
+
+void ASleedCharacter::OnRep_DeathFalling()
+{
+	if (SleedPlayerController)
+	{
+		DisableInput(SleedPlayerController);
+	}
+}
+
+// Checkpoint
 void ASleedCharacter::SetCheckpoint(APlayerStart* Checkpoint)
 {
 	SleedPlayerController = SleedPlayerController == nullptr ? Cast<ASleedPlayerController>(Controller) : SleedPlayerController;
@@ -960,6 +1004,8 @@ void ASleedCharacter::SetCheckpoint(APlayerStart* Checkpoint)
 		}
 	}
 }
+
+// End Run
 
 USleedSaveGame* ASleedCharacter::getDataForSave()
 {	
@@ -986,4 +1032,13 @@ USleedSaveGame* ASleedCharacter::getDataForSave()
 	}
 
 	return nullptr;
+}
+
+void ASleedCharacter::StartEndLevelWidget()
+{
+	SleedPlayerController = SleedPlayerController == nullptr ? Cast<ASleedPlayerController>(Controller) : SleedPlayerController;
+	if (SleedPlayerController)
+	{
+		SleedPlayerController->SetEndLevelWidget();
+	}
 }

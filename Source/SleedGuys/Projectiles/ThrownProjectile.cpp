@@ -4,7 +4,7 @@
 #include "ThrownProjectile.h"
 #include "Components/SphereComponent.h"
 #include "SleedGuys/CheckpointTrigger.h"
-#include "SleedGuys/Audio/LevelAudioActor.h"
+#include "SleedGuys/Audio/AudioTrigger.h"
 #include "SleedGuys/Character/SleedCharacter.h"
 
 AThrownProjectile::AThrownProjectile()
@@ -39,10 +39,10 @@ void AThrownProjectile::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent
 			return;
 		}
 
-		ALevelAudioActor* MusicActor = Cast<ALevelAudioActor>(OtherActor);
+		AAudioTrigger* MusicActor = Cast<AAudioTrigger>(OtherActor);
 		if (MusicActor)
 		{
-			MusicActor->ChangeSound();
+			MusicActor->ChangeSoundTrigger();
 
 			OverlapSphere->OnComponentBeginOverlap.RemoveDynamic(this, &AThrownProjectile::OnSphereOverlap);
 		}

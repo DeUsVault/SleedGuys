@@ -6,10 +6,6 @@
 ALevelAudioActor::ALevelAudioActor()
 {
 	PrimaryActorTick.bCanEverTick = false;
-	bReplicates = true;
-
-	AudioSceneComponent = CreateDefaultSubobject<USceneComponent>(TEXT("AudioSceneComponent"));
-	SetRootComponent(AudioSceneComponent);
 
 	AudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("AudioComponent"));
 	AudioComponent->bIsUISound = false;
@@ -19,6 +15,8 @@ ALevelAudioActor::ALevelAudioActor()
 void ALevelAudioActor::BeginPlay()
 {
 	Super::BeginPlay();
+
+	AudioComponent->SetVolumeMultiplier(CustomVolume);
 
 	NumberOfAudios = AudioChoices.Num();
 
@@ -31,6 +29,7 @@ void ALevelAudioActor::BeginPlay()
 
 void ALevelAudioActor::ChangeSound()
 {	
+	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, TEXT("receive broadcast"));
 	AudioCounter++;
 	if (AudioCounter >= NumberOfAudios)
 	{

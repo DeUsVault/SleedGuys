@@ -33,7 +33,7 @@ void ABoundChecker::OnBoxOverlap(UPrimitiveComponent* OverlappedComponent, AActo
 	ASleedCharacter* SleedCharacter = Cast<ASleedCharacter>(OtherActor);
 	if (SleedCharacter)
 	{
-		SleedCharacter->ElimTimerFinished();
+		SleedCharacter->initFallDeath();
 	}
 }
 

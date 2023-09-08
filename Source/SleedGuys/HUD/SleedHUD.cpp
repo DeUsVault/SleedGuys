@@ -6,6 +6,7 @@
 #include "CharacterOverlay.h"
 #include "ButtonPresser.h"
 #include "GameMenu.h"
+#include "EndLevelWidget.h"
 
 void ASleedHUD::BeginPlay()
 {
@@ -81,5 +82,18 @@ UGameMenu* ASleedHUD::HandleGameWidget()
 	}
 
 	return nullptr;
+}
+
+void ASleedHUD::AddEndLevelWidget()
+{
+	APlayerController* PlayerController = GetOwningPlayerController();
+	if (PlayerController && EndLevelWidgetClass)
+	{
+		EndLevelWidget = CreateWidget<UEndLevelWidget>(PlayerController, EndLevelWidgetClass);
+		if (EndLevelWidget)
+		{
+			EndLevelWidget->AddToViewport();
+		}
+	}
 }
 

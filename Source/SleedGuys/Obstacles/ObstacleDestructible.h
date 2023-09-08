@@ -42,5 +42,13 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	UGeometryCollectionComponent* GeometryCollection;
+
+	// destroy actor
+	void HandleDestruction();
+
+	UPROPERTY(EditAnywhere)
+	float DestroyTimer = 3.0f;
+
+	FTimerHandle DestroyTimerHandle;
 	
 };

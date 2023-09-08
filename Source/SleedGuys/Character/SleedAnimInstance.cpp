@@ -35,5 +35,6 @@ void USleedAnimInstance::NativeUpdateAnimation(float DeltaTime)
 	bSliding = SleedCharacter->GetIsSliding();
 	bCelebrates = SleedCharacter->IsCelebrating();
 	bElimmed = SleedCharacter->IsElimmed();
+	bFallingDeath = SleedCharacter->GetFallDeath();
 }
 

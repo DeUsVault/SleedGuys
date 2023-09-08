@@ -20,7 +20,6 @@ AObstacleDestructible::AObstacleDestructible()
 
 void AObstacleDestructible::BindOverlap()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("AObstacleDestructible DES DES DES BindOverlap function"));
 	if (HasAuthority())
 	{	
 		AreaSphere->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
@@ -34,8 +33,16 @@ void AObstacleDestructible::OnSphereOverlap(UPrimitiveComponent* OverlappedCompo
 	ASleedCharacter* SleedCharacter = Cast<ASleedCharacter>(OtherActor);
 	if (SleedCharacter)
 	{	
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("field creation"));
+		this->SetActorTickEnabled(false); // stop tick functionality
 		ObstacleMesh->DestroyComponent();
 		CreateFields(SweepResult.ImpactPoint);
+
+		GetWorldTimerManager().SetTimer(DestroyTimerHandle, this, &AObstacleDestructible::HandleDestruction, DestroyTimer, false);
 	}
+}
+
+void AObstacleDestructible::HandleDestruction()
+{
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Green, TEXT("destruct overlap"));
+	Destroy();
 }

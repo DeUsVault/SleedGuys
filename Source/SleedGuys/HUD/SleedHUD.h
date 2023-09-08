@@ -10,6 +10,7 @@ class UUserWidget;
 class UCharacterOverlay;
 class UButtonPresser;
 class UGameMenu;
+class UEndLevelWidget;
 
 /**
  * 
@@ -40,6 +41,14 @@ public:
 	UGameMenu* GameMenu;
 
 	UGameMenu* HandleGameWidget();
+
+	// custom widget for level ending
+	UPROPERTY(EditAnywhere, Category = "Custom Widgets")
+	TSubclassOf<UEndLevelWidget> EndLevelWidgetClass;
+
+	UEndLevelWidget* EndLevelWidget;
+
+	void AddEndLevelWidget();
 protected:
 	virtual void BeginPlay() override;
 	void AddCharacterOverlay();

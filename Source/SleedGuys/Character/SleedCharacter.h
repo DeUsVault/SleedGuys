@@ -22,6 +22,7 @@ class USleedCableComponent;
 class UNiagaraSystem;
 class APlayerStart;
 class USleedSaveGame;
+class USoundCue;
 
 UCLASS()
 class SLEEDGUYS_API ASleedCharacter : public ACharacter
@@ -91,6 +92,12 @@ public:
 	void PlayThrowMontage();
 
 	void AddDeath();
+
+	// end level/run
+	void StartEndLevelWidget();
+
+	// falling
+	void initFallDeath();
 
 protected:
 	virtual void BeginPlay() override;
@@ -185,6 +192,11 @@ private:
 	UNiagaraSystem* SecondaryJumpEffect = nullptr;
 
 	void NiagaraJumpEffect(UNiagaraSystem* JumpEffect);
+
+	UPROPERTY(EditAnywhere)
+	USoundCue* JumpSound;
+
+	void PlayJumpSound();
 
 	// Weapon Logic
 	UPROPERTY(Replicated, ReplicatedUsing = OnRep_OverlappingWeapon)
@@ -327,6 +339,13 @@ private:
 	UPROPERTY(EditDefaultsOnly)
 	float ElimDelay = 3.f;
 
+	// falling
+	UPROPERTY(Replicated, ReplicatedUsing = OnRep_DeathFalling)
+	bool bFallDeath = false;
+
+	UFUNCTION()
+	void OnRep_DeathFalling();
+
 public:
 	// Place for Getters/Setters only
 	void SetOverlappingWeapon(ABaseWeapon* Weapon);
@@ -345,6 +364,7 @@ public:
 	FORCEINLINE bool GetIsSliding() const { return this->bIsSliding; }
 	FORCEINLINE bool IsElimmed() const { return bElimmed; }
 	void SetCheckpoint(APlayerStart* Checkpoint);
+	FORCEINLINE bool GetFallDeath() const { return bFallDeath; }
 
 	USleedSaveGame* getDataForSave();
 };

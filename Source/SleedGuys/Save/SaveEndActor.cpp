@@ -30,7 +30,8 @@ void ASaveEndActor::OnBoxOverlap(UPrimitiveComponent* OverlappedComponent, AActo
 {
 	ASleedCharacter* SleedCharacter = Cast<ASleedCharacter>(OtherActor);
 	if (SleedCharacter)
-	{
+	{	
+		// save the run
 		USleedSaveGame* SaveData = SleedCharacter->getDataForSave();
 		if (SaveData)
 		{	
@@ -45,6 +46,9 @@ void ASaveEndActor::OnBoxOverlap(UPrimitiveComponent* OverlappedComponent, AActo
 				MyGameInstance->SaveGameData(FVector::ZeroVector, SaveData->TimeSpent, SaveData->Deaths, SaveData->Coins);
 			}
 		}
+
+		// redirect to main menu
+		SleedCharacter->StartEndLevelWidget();
 	}
 }
 

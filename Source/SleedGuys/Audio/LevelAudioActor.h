@@ -17,15 +17,13 @@ class SLEEDGUYS_API ALevelAudioActor : public AActor
 public:
 	ALevelAudioActor();
 
+	UFUNCTION()
 	void ChangeSound();
 
 protected:
 	virtual void BeginPlay() override;
 
 private:
-	UPROPERTY(EditDefaultsOnly)
-	USceneComponent* AudioSceneComponent;
-
 	UPROPERTY(VisibleAnywhere)
 	UAudioComponent* AudioComponent;
 
@@ -35,5 +33,8 @@ private:
 	int32 AudioCounter = 0;
 
 	int32 NumberOfAudios = 0;
+
+	UPROPERTY(EditAnywhere)
+	float CustomVolume = 0.5f;
 
 };

@@ -176,3 +176,11 @@ void ASleedPlayerController::SetHUDDeaths(int32 Deaths)
 	}
 }
 
+void ASleedPlayerController::SetEndLevelWidget()
+{
+	if (SleedHUD)
+	{
+		SleedHUD->AddEndLevelWidget();
+	}
+}
+
