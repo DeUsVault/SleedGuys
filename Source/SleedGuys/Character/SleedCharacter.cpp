@@ -270,7 +270,7 @@ bool ASleedCharacter::IsWeaponEquipped()
 
 void ASleedCharacter::Move(const FInputActionValue& Value)
 {
-	if (IsStunned()) return;
+	if (IsStunned() || bFallDeath) return;
 	
 	const FVector2D MovementVector = Value.Get<FVector2D>();
 
@@ -319,7 +319,7 @@ void ASleedCharacter::Look(const FInputActionValue& Value)
 
 void ASleedCharacter::Jump()
 {	
-	if (IsStunned()) return;
+	if (IsStunned() || bFallDeath) return;
 
 	// jump is called both on server and client - reasoning not found yet!
 	if (JumpState == EJumpState::EJS_NoJump)
@@ -970,11 +970,6 @@ void ASleedCharacter::initFallDeath()
 
 	bFallDeath = true;
 
-	if (SleedPlayerController)
-	{
-		DisableInput(SleedPlayerController);
-	}
-
 	GetWorldTimerManager().SetTimer(
 		ElimTimer,
 		this,
@@ -1037,8 +1032,10 @@ USleedSaveGame* ASleedCharacter::getDataForSave()
 void ASleedCharacter::StartEndLevelWidget()
 {
 	SleedPlayerController = SleedPlayerController == nullptr ? Cast<ASleedPlayerController>(Controller) : SleedPlayerController;
-	if (SleedPlayerController)
-	{
-		SleedPlayerController->SetEndLevelWidget();
-	}
+	if (!SleedPlayerController) return;
+
+	SleedPlayerState = SleedPlayerState == nullptr ? Cast<ASleedPlayerState>(SleedPlayerController->PlayerState) : SleedPlayerState;
+	if (!SleedPlayerState) return;
+	
+	SleedPlayerController->SetEndLevelWidget(FMath::CeilToInt(GetWorld()->GetTimeSeconds()), SleedPlayerState->getDeaths(), SleedPlayerState->getGold());
 }

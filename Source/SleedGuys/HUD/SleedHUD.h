@@ -48,7 +48,7 @@ public:
 
 	UEndLevelWidget* EndLevelWidget;
 
-	void AddEndLevelWidget();
+	void AddEndLevelWidget(int32 Time, int32 Deaths, int32 Coins);
 protected:
 	virtual void BeginPlay() override;
 	void AddCharacterOverlay();

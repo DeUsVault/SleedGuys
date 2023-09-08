@@ -84,15 +84,16 @@ UGameMenu* ASleedHUD::HandleGameWidget()
 	return nullptr;
 }
 
-void ASleedHUD::AddEndLevelWidget()
+void ASleedHUD::AddEndLevelWidget(int32 Time, int32 Deaths, int32 Coins)
 {
 	APlayerController* PlayerController = GetOwningPlayerController();
 	if (PlayerController && EndLevelWidgetClass)
 	{
 		EndLevelWidget = CreateWidget<UEndLevelWidget>(PlayerController, EndLevelWidgetClass);
 		if (EndLevelWidget)
-		{
+		{	
 			EndLevelWidget->AddToViewport();
+			EndLevelWidget->DynamicSetup(Time, Deaths, Coins);
 		}
 	}
 }

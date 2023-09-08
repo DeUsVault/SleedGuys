@@ -27,7 +27,7 @@ public:
 	void SetGameMenuWidget();
 	void SetHUDMatchTime(float Time);
 	void SetHUDDeaths(int32 Deaths);
-	void SetEndLevelWidget();
+	void SetEndLevelWidget(int32 Time, int32 Deaths, int32 Coins);
 
 protected:
 	virtual void BeginPlay() override;

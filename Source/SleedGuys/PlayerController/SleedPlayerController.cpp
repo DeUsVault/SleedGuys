@@ -176,11 +176,11 @@ void ASleedPlayerController::SetHUDDeaths(int32 Deaths)
 	}
 }
 
-void ASleedPlayerController::SetEndLevelWidget()
+void ASleedPlayerController::SetEndLevelWidget(int32 Time, int32 Deaths, int32 Coins)
 {
 	if (SleedHUD)
-	{
-		SleedHUD->AddEndLevelWidget();
+	{	
+		SleedHUD->AddEndLevelWidget(Time, Deaths, Coins);
 	}
 }
 

@@ -7,6 +7,7 @@
 #include "EndLevelWidget.generated.h"
 
 class UTextBlock;
+class UButton;
 
 /**
  * 
@@ -19,5 +20,35 @@ class SLEEDGUYS_API UEndLevelWidget : public UUserWidget
 public:
 	UPROPERTY(meta = (BindWidget))
 	UTextBlock* EndLevelText;
+
+	UPROPERTY(meta = (BindWidget))
+	UTextBlock* TimeText;
+
+	UPROPERTY(meta = (BindWidget))
+	UTextBlock* DeathText;
+
+	UPROPERTY(meta = (BindWidget))
+	UTextBlock* CoinsText;
+
+	UPROPERTY(meta = (BindWidget))
+	UButton* RestartButton;
+
+	UPROPERTY(meta = (BindWidget))
+	UButton* ExitButton;
+
+	void DynamicSetup(int32 Time, int32 Deaths, int32 Coins);
+
+protected:
+	virtual bool Initialize() override;
+
+private:
+	UFUNCTION()
+	void RestartButtonClicked();
+
+	UFUNCTION()
+	void ExitButtonClicked();
+
+	UPROPERTY(EditAnywhere)
+	FName MainMenuMap;
 	
 };

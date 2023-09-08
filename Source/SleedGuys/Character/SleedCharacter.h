@@ -360,6 +360,7 @@ public:
 	FORCEINLINE void SetHealth(float Amount) { Health = Amount; }
 	void AddGold(int32 AmountOfGold);
 	FORCEINLINE ECharacterStunState GetCharacterStunState() const { return this->CharacterStunState; }
+	FORCEINLINE void SetIsCelebrating(bool bCele) { bIsCelebrating = bCele; }
 	FORCEINLINE bool IsCelebrating() const { return this->bIsCelebrating; }
 	FORCEINLINE bool GetIsSliding() const { return this->bIsSliding; }
 	FORCEINLINE bool IsElimmed() const { return bElimmed; }

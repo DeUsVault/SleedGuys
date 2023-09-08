@@ -48,6 +48,7 @@ void ASaveEndActor::OnBoxOverlap(UPrimitiveComponent* OverlappedComponent, AActo
 		}
 
 		// redirect to main menu
+		SleedCharacter->SetIsCelebrating(true);
 		SleedCharacter->StartEndLevelWidget();
 	}
 }
